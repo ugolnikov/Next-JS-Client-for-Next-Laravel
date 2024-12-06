@@ -1,7 +1,6 @@
 'use client'
 import axios from '@/lib/axios'
 import useSWR from 'swr'
-import Loading from '@/components/Loading'
 import Loader from '@/components/Loader'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
@@ -90,12 +89,16 @@ const ProductList = () => {
                                 className="w-[100%]"
                             />
                             <div className="flex flex-col mt-2">
-                                <h2 className="whitespace-nowrap text-ellipsis overflow-hidden">
+                                <h2 className="whitespace-nowrap text-ellipsis overflow-hidden text-2xl">
                                     {product.name}
                                 </h2>
-                                <p className="text-[#4438ca]">
+                                <p className="text-[#4438ca] text-2xl font-medium">
                                     Цена: {product.price}₽
                                 </p>
+                                <p>
+                                    - {product.short_description}
+                                </p>
+                                
                             </div>
                         </li>
                     ))}

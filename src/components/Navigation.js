@@ -3,7 +3,9 @@ import ApplicationLogo from '@/components/ApplicationLogo'
 import Dropdown from '@/components/Dropdown'
 import Link from 'next/link'
 import NavLink from '@/components/NavLink'
-import ResponsiveNavLink, { ResponsiveNavButton } from '@/components/ResponsiveNavLink'
+import ResponsiveNavLink, {
+    ResponsiveNavButton,
+} from '@/components/ResponsiveNavLink'
 import { DropdownButton } from '@/components/DropdownLink'
 import { useAuth } from '@/hooks/auth'
 import { usePathname } from 'next/navigation'
@@ -31,7 +33,9 @@ const Navigation = ({ user }) => {
                             <NavLink href="/" active={usePathname() === '/'}>
                                 Товары
                             </NavLink>
-                            <NavLink href="/dashboard" active={usePathname() === '/dashboard'}>
+                            <NavLink
+                                href="/dashboard"
+                                active={usePathname() === '/dashboard'}>
                                 Личный кабинет
                             </NavLink>
                         </div>
@@ -52,8 +56,7 @@ const Navigation = ({ user }) => {
                                             <svg
                                                 className="fill-current h-4 w-4"
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 20 20"
-                                            >
+                                                viewBox="0 0 20 20">
                                                 <path
                                                     fillRule="evenodd"
                                                     d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
@@ -62,8 +65,7 @@ const Navigation = ({ user }) => {
                                             </svg>
                                         </div>
                                     </button>
-                                }
-                            >
+                                }>
                                 {/* Authentication */}
                                 <DropdownButton onClick={logout}>
                                     Выход
@@ -76,9 +78,12 @@ const Navigation = ({ user }) => {
                     <div className="-mr-2 flex items-center sm:hidden">
                         <button
                             onClick={() => setOpen(open => !open)}
-                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
-                        >
-                            <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                            <svg
+                                className="h-6 w-6"
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 24 24">
                                 {open ? (
                                     <path
                                         className="inline-flex"
@@ -106,16 +111,37 @@ const Navigation = ({ user }) => {
             {open && (
                 <div className="block sm:hidden">
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href="/" active={usePathname() === '/'}>
-                                Товары
+                        <ResponsiveNavLink
+                            href="/"
+                            active={usePathname() === '/'}>
+                            Товары
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink href="/dashboard" active={usePathname() === '/dashboard'}>
+
+                        {!user ? (
+                            <>
+                                <ResponsiveNavLink
+                                    href="/login"
+                                    active={usePathname() === '/login'}>
+                                    Вход
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href="/register"
+                                    active={usePathname() === '/register'}>
+                                    Регистрация
+                                </ResponsiveNavLink>
+                            </>
+                        ) : (
+                            <ResponsiveNavLink
+                                href="/dashboard"
+                                active={usePathname() === '/dashboard'}>
                                 Личный кабинет
-                        </ResponsiveNavLink>
+                            </ResponsiveNavLink>
+                        )}
                     </div>
 
                     {/* Responsive Settings Options */}
-                    <div className="pt-4 pb-1 border-t border-gray-200">
+                    {user ? (
+                        <div className="pt-4 pb-1 border-t border-gray-200">
                         <div className="flex items-center px-4">
                             <div className="flex-shrink-0">
                                 <svg
@@ -123,8 +149,7 @@ const Navigation = ({ user }) => {
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
                                     viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
+                                    stroke="currentColor">
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -134,9 +159,16 @@ const Navigation = ({ user }) => {
                                 </svg>
                             </div>
 
+
+
+
                             <div className="ml-3">
-                                <div className="font-medium text-base text-gray-800">{user?.name}</div>
-                                <div className="font-medium text-sm text-gray-500">{user?.email}</div>
+                                <div className="font-medium text-base text-gray-800">
+                                    {user?.name}
+                                </div>
+                                <div className="font-medium text-sm text-gray-500">
+                                    {user?.email}
+                                </div>
                             </div>
                         </div>
 
@@ -147,6 +179,9 @@ const Navigation = ({ user }) => {
                             </ResponsiveNavButton>
                         </div>
                     </div>
+                    ) : null}
+
+                    
                 </div>
             )}
         </nav>
