@@ -27,9 +27,9 @@ const Page = () => {
     return (
         <>
             <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that
-                will allow you to choose a new one.
+                Забыли пароль? Без проблем. Просто сообщите нам свой адрес электронной почты
+                адрес, и мы отправим вам по электронной почте ссылку для сброса пароля, которая
+                позволит вам выбрать новый.
             </div>
 
             {/* Session Status */}
@@ -38,7 +38,7 @@ const Page = () => {
             <form onSubmit={submitForm}>
                 {/* Email Address */}
                 <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Электронная почта</Label>
                     <Input
                         id="email"
                         type="email"
@@ -54,7 +54,7 @@ const Page = () => {
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
-                    <Button>Email Password Reset Link</Button>
+                    <Button>Ссылка для сброса пароля электронной почты</Button>
                 </div>
             </form>
         </>

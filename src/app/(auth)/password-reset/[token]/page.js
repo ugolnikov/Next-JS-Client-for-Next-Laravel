@@ -44,7 +44,7 @@ const PasswordReset = () => {
             <form onSubmit={submitForm}>
                 {/* Email Address */}
                 <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Электронная почта</Label>
 
                     <Input
                         id="email"
@@ -61,7 +61,7 @@ const PasswordReset = () => {
 
                 {/* Password */}
                 <div className="mt-4">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Пароль</Label>
                     <Input
                         id="password"
                         type="password"
@@ -80,7 +80,7 @@ const PasswordReset = () => {
                 {/* Confirm Password */}
                 <div className="mt-4">
                     <Label htmlFor="passwordConfirmation">
-                        Confirm Password
+                        Подтвердите пароль
                     </Label>
 
                     <Input
@@ -101,7 +101,7 @@ const PasswordReset = () => {
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
-                    <Button>Reset Password</Button>
+                    <Button>Сбросить пароль</Button>
                 </div>
             </form>
         </>

@@ -50,7 +50,7 @@ const Login = () => {
             <form onSubmit={submitForm}>
                 {/* Email Address */}
                 <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Электронная почта</Label>
 
                     <Input
                         id="email"
@@ -67,7 +67,7 @@ const Login = () => {
 
                 {/* Password */}
                 <div className="mt-4">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Пароль</Label>
 
                     <Input
                         id="password"
@@ -101,7 +101,7 @@ const Login = () => {
                         />
 
                         <span className="ml-2 text-sm text-gray-600">
-                            Remember me
+                            Запомнить меня
                         </span>
                     </label>
                 </div>
@@ -110,10 +110,10 @@ const Login = () => {
                     <Link
                         href="/forgot-password"
                         className="underline text-sm text-gray-600 hover:text-gray-900">
-                        Forgot your password?
+                        Забыли пароль?
                     </Link>
 
-                    <Button className="ml-3">Login</Button>
+                    <Button className="ml-3">Вход</Button>
                 </div>
             </form>
         </>

@@ -1,14 +1,16 @@
+'use client'
 import Link from 'next/link'
 import AuthCard from '@/app/(auth)/AuthCard'
 import ApplicationLogo from '@/components/ApplicationLogo'
+import Navigation from '@/components/Navigation'
+import { useAuth } from '@/hooks/auth'
 
-export const metadata = {
-    title: 'Laravel',
-}
 
 const Layout = ({ children }) => {
+    const { user } = useAuth({ middleware: 'guest' })
     return (
-        <div>
+        <main>
+            <Navigation user={user} />
             <div className="text-gray-900 antialiased">
                 <AuthCard
                     logo={
@@ -19,7 +21,7 @@ const Layout = ({ children }) => {
                     {children}
                 </AuthCard>
             </div>
-        </div>
+        </main>
     )
 }
 

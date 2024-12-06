@@ -4,6 +4,8 @@ export const metadata = {
     title: 'Laravel - Личный кабинет',
 }
 
+
+
 const Dashboard = () => {
     return (
         <>
