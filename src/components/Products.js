@@ -2,9 +2,10 @@
 import axios from '@/lib/axios'
 import useSWR from 'swr'
 import Loader from '@/components/Loader'
-import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import Search from '@/components/Search'
+import Link from 'next/link'
+import ImageWithLoader from './ImageWithLoader'
 
 const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
     const url = `/api/products?${sellerId ? `seller_id=${sellerId}&` : ''}${
@@ -81,7 +82,8 @@ const ProductList = () => {
                         <li
                             key={product.id}
                             className="border w-[50%] sm:w-[25%] p-8">
-                            <Image
+                            <Link href={`/product/${product.id}`}>
+                            <ImageWithLoader
                                 src={product.image_preview}
                                 width={150}
                                 height={150}
@@ -100,6 +102,7 @@ const ProductList = () => {
                                 </p>
                                 
                             </div>
+                            </Link>
                         </li>
                     ))}
                 </ul>

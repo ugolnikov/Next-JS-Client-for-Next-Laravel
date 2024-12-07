@@ -1,5 +1,4 @@
 import ProductList from '@/components/Products'
-import Navigation from '@/components/Navigation'
 
 const Home = () => {
     return (
