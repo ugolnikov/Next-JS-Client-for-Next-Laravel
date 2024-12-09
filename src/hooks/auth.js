@@ -12,11 +12,11 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             .get('/api/user')
             .then(res => res.data)
             .catch(error => {
-                throw error
-            }),
+                throw error 
+            })
     )
-
     const csrf = () => axios.get('/sanctum/csrf-cookie')
+
 
     const register = async ({ setErrors, ...props }) => {
         await csrf()
@@ -84,10 +84,16 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const logout = async () => {
+        await csrf()
+        
         if (!error) {
-            await axios.post('/logout').then(() => mutate())
+            await axios
+                    .post('/logout')
+                    .then(() => mutate())
+        } else {
+            console.log("Ошибка:", error)
         }
-
+        
         window.location.pathname = '/login'
     }
 

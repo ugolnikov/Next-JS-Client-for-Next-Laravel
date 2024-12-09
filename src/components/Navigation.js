@@ -15,6 +15,7 @@ import LoginLinks from '@/components/LoginLinks'
 const Navigation = ({ user }) => {
     const { logout } = useAuth()
     const [open, setOpen] = useState(false)
+    const pathname = usePathname()
     return (
         <nav className="bg-white border-b border-gray-100">
             {/* Primary Navigation Menu */}
@@ -30,12 +31,12 @@ const Navigation = ({ user }) => {
 
                         {/* Navigation Links */}
                         <div className="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                            <NavLink href="/" active={usePathname() === '/'}>
+                            <NavLink href="/" active={pathname === '/'}>
                                 Товары
                             </NavLink>
                             <NavLink
                                 href="/dashboard"
-                                active={usePathname() === '/dashboard'}>
+                                active={pathname === '/dashboard'}>
                                 Личный кабинет
                             </NavLink>
                         </div>
@@ -113,7 +114,7 @@ const Navigation = ({ user }) => {
                     <div className="pt-2 pb-3 space-y-1">
                         <ResponsiveNavLink
                             href="/"
-                            active={usePathname() === '/'}>
+                            active={pathname === '/'}>
                             Товары
                         </ResponsiveNavLink>
 
@@ -121,19 +122,19 @@ const Navigation = ({ user }) => {
                             <>
                                 <ResponsiveNavLink
                                     href="/login"
-                                    active={usePathname() === '/login'}>
+                                    active={pathname === '/login'}>
                                     Вход
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink
                                     href="/register"
-                                    active={usePathname() === '/register'}>
+                                    active={pathname === '/register'}>
                                     Регистрация
                                 </ResponsiveNavLink>
                             </>
                         ) : (
                             <ResponsiveNavLink
                                 href="/dashboard"
-                                active={usePathname() === '/dashboard'}>
+                                active={pathname === '/dashboard'}>
                                 Личный кабинет
                             </ResponsiveNavLink>
                         )}
