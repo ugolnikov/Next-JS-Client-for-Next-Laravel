@@ -112,6 +112,9 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
                 throw error
             }), {
                 revalidateOnFocus: false,
+                onErrorRetry: (error, key) => {
+                    if (key === '/api/user' && error.status === 401) return
+                },
             }
     )
 

@@ -52,7 +52,7 @@ const Navigation = ({ user }) => {
                             </>
                         ) : (
                             <>
-                            {user.role ? (
+                            {user?.role === 'customer' ? (
                                 <CartIcon />
                             ) : ((null))}
                             
