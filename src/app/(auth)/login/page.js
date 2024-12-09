@@ -113,7 +113,7 @@ const Login = () => {
                         Забыли пароль?
                     </Link>
 
-                    <Button className="ml-3">Вход</Button>
+                    <Button className="ml-3 rounded text-sm">Вход</Button>
                 </div>
             </form>
         </>

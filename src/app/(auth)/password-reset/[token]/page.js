@@ -101,7 +101,7 @@ const PasswordReset = () => {
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
-                    <Button>Сбросить пароль</Button>
+                    <Button className="rounded">Сбросить пароль</Button>
                 </div>
             </form>
         </>

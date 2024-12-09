@@ -114,7 +114,7 @@ const Page = () => {
                     Уже зарегистрированы?
                 </Link>
 
-                <Button className="ml-4">Регистрация</Button>
+                <Button className="ml-4 rounded">Регистрация</Button>
             </div>
         </form>
     )

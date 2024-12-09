@@ -1,3 +1,4 @@
+import Button from '@/components/Button'
 const Search = ({ searchQuery, setSearchQuery, handleSearch }) => {
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -16,9 +17,9 @@ const Search = ({ searchQuery, setSearchQuery, handleSearch }) => {
                     placeholder="Поиск товаров..."
                     className="w-full px-4 py-3 rounded-l border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4438ca] focus:border-transparent"
                 />
-                <button
+                <Button
                     onClick={handleSearch}
-                    className="px-6 py-3 bg-[#4438ca] text-white rounded-r hover:bg-[#362ea1] transition-colors duration-200 flex items-center">
+                    className="px-6 py-3 text-xs bg-[#4438ca] text-white rounded-r hover:bg-[#362ea1] transition-colors duration-200 flex items-center">
                     <svg 
                         className="w-5 h-5" 
                         fill="none" 
@@ -33,7 +34,7 @@ const Search = ({ searchQuery, setSearchQuery, handleSearch }) => {
                         />
                     </svg>
                     <span className="ml-2">Поиск</span>
-                </button>
+                </Button>
             </div>
         </div>
     )

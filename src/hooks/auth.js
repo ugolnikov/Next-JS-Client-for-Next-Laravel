@@ -6,6 +6,7 @@ import { useParams, useRouter } from 'next/navigation'
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
+    const csrf = () => axios.get('/sanctum/csrf-cookie')
 
     const { data: user, error, mutate } = useSWR('/api/user', () =>
         axios
@@ -13,9 +14,14 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             .then(res => res.data)
             .catch(error => {
                 throw error 
-            })
+            }), {
+                onErrorRetry: (error, key) => {
+                    if (key === '/api/user' && error.status === 401) return
+                },
+
+            }
     )
-    const csrf = () => axios.get('/sanctum/csrf-cookie')
+    
 
 
     const register = async ({ setErrors, ...props }) => {
@@ -97,12 +103,41 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         window.location.pathname = '/login'
     }
 
+
+    const { data: cart, error: cartError, mutate: mutateCart } = useSWR('/api/cart', () =>
+        axios
+            .get('/api/cart')
+            .then(res => res.data)
+            .catch(error => {
+                throw error
+            }), {
+                revalidateOnFocus: false,
+            }
+    )
+
+
+    const addToCart = async (productId, quantity) => {
+        if (!user) {
+            router.push('/login')
+            return
+        }
+
+        await csrf()
+
+        try {
+            await axios.post('/api/cart', { product_id: productId, quantity: quantity })
+            mutateCart() 
+        } catch (error) {
+            console.error('Ошибка при добавлении в корзину:', error)
+        }
+    }
+
+
     useEffect(() => {
         if (middleware === 'guest' && redirectIfAuthenticated && user)
             router.push(redirectIfAuthenticated)
         if (middleware === 'auth' && error) logout()
     }, [user, error])
-
     return {
         user,
         register,
@@ -110,5 +145,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         forgotPassword,
         resetPassword,
         logout,
+        cart,
+        addToCart
     }
 }

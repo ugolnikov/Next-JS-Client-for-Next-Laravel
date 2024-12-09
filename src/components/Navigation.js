@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/auth'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import LoginLinks from '@/components/LoginLinks'
+import CartIcon from '@/components/CartIcon'
 
 const Navigation = ({ user }) => {
     const { logout } = useAuth()
@@ -34,19 +35,27 @@ const Navigation = ({ user }) => {
                             <NavLink href="/" active={pathname === '/'}>
                                 Товары
                             </NavLink>
+                            {user ? (
                             <NavLink
                                 href="/dashboard"
                                 active={pathname === '/dashboard'}>
                                 Личный кабинет
-                            </NavLink>
+                            </NavLink> ) : (null)}
                         </div>
                     </div>
 
                     {/* Settings Dropdown */}
                     <div className="hidden sm:flex sm:items-center sm:ml-6">
                         {!user ? (
-                            <LoginLinks />
+                            <>
+                                <LoginLinks />
+                            </>
                         ) : (
+                            <>
+                            {user.role ? (
+                                <CartIcon />
+                            ) : ((null))}
+                            
                             <Dropdown
                                 align="right"
                                 width="48"
@@ -72,6 +81,7 @@ const Navigation = ({ user }) => {
                                     Выход
                                 </DropdownButton>
                             </Dropdown>
+                            </>
                         )}
                     </div>
 
@@ -159,8 +169,6 @@ const Navigation = ({ user }) => {
                                     />
                                 </svg>
                             </div>
-
-
 
 
                             <div className="ml-3">

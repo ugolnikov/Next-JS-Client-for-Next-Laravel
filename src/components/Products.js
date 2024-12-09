@@ -4,8 +4,11 @@ import useSWR from 'swr'
 import Loader from '@/components/Loader'
 import { useState, useEffect } from 'react'
 import Search from '@/components/Search'
-import Link from 'next/link'
 import ImageWithLoader from './ImageWithLoader'
+import AddToCart from '@/components/AddToCartButton'
+import { useRouter } from 'next/navigation'
+import Button from '@/components/Button'
+import AddToCartBtn from '@/components/AddToCartButton'
 
 const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
     const url = `/api/products?${sellerId ? `seller_id=${sellerId}&` : ''}${
@@ -22,7 +25,7 @@ const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
             .then(res => res.data)
             .catch(err => {
                 throw err
-            }),
+            })
     )
     const refreshProducts = () => mutate()
     return {
@@ -34,6 +37,7 @@ const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
 }
 
 const ProductList = () => {
+    const router = useRouter();
     const [page, setPage] = useState(1)
     const [searchQuery, setSearchQuery] = useState('')
     const [submitQuery, setSubmitQuery] = useState('')
@@ -41,6 +45,7 @@ const ProductList = () => {
         searchQuery: submitQuery,
         page,
     })
+    
 
     const handleSearch = () => {
         setSubmitQuery(searchQuery)
@@ -49,6 +54,9 @@ const ProductList = () => {
     const handlePageChange = event => {
         const selectedPage = parseInt(event.target.value)
         setPage(selectedPage)
+    }
+    const handleClick = (productId) => {
+        router.push(`/product/${productId}`)
     }
     useEffect(() => {
         if (products && products.data.length === 0 && page > 1) {
@@ -69,20 +77,21 @@ const ProductList = () => {
             {isLoading ? (
                 <Loader />
             ) : isError ? (
-                <h1 className="text-5xl w-full h-[70%] flex items-center justify-center">
+                <h1 className="text-3xl w-full h-[70%] flex items-center justify-center">
                     Ошибка загрузки товаров!
                 </h1>
             ) : !products || products?.data.length === 0 ? (
-                <h1 className="text-5xl w-full h-[70%] flex items-center justify-center">
+                <h1 className="text-3xl w-full h-[70%] flex items-center justify-center">
                     Ничего не найдено
                 </h1>
             ) : (
-                <ul className="flex flex-wrap">
+                // <ul className="flex flex-wrap">
+                <ul className='grid grid-cols-1 2sm:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'>
                     {products?.data.map(product => (
                         <li
                             key={product.id}
-                            className="border w-[50%] sm:w-[25%] p-8">
-                            <Link href={`/product/${product.id}`}>
+                            onClick={() => handleClick(product.id)}
+                            className="border p-4 m-4 cursor-pointer hover:border-[#4438ca] rounded">
                             <ImageWithLoader
                                 src={product.image_preview}
                                 width={150}
@@ -91,18 +100,16 @@ const ProductList = () => {
                                 className="w-[100%]"
                             />
                             <div className="flex flex-col mt-2">
-                                <h2 className="whitespace-nowrap text-ellipsis overflow-hidden text-2xl">
+                                <h2 className="whitespace-nowrap text-ellipsis overflow-hidden text-xl">
                                     {product.name}
                                 </h2>
-                                <p className="text-[#4438ca] text-2xl font-medium">
+                                <p className="text-[#4438ca] text-xl font-medium">
                                     Цена: {product.price}₽
                                 </p>
                                 <p>
                                     - {product.short_description}
                                 </p>
-                                
                             </div>
-                            </Link>
                         </li>
                     ))}
                 </ul>
@@ -110,14 +117,14 @@ const ProductList = () => {
 
             {/* Пагинация */}
             <div className="flex justify-center mt-5">
-                <button
+                <Button
                     onClick={() =>
                         setPage(prevPage => Math.max(prevPage - 1, 1))
                     }
                     disabled={page === 1}
-                    className="px-4 py-2 bg-[#4438ca] text-white rounded-l">
+                    className="px-4 py-2 text-xs rounded-l">
                     Назад
-                </button>
+                </Button>
 
                 <select
                     value={page}
@@ -130,12 +137,12 @@ const ProductList = () => {
                     ))}
                 </select>
 
-                <button
+                <Button
                     onClick={() => setPage(prevPage => prevPage + 1)}
                     disabled={page === products?.last_page}
-                    className="px-4 py-2 bg-[#4438ca] text-white rounded-r">
+                    className="px-4 py-2 text-xs rounded-r">
                     Вперед
-                </button>
+                </Button>
             </div>
 
             {/* Показ текущей страницы */}

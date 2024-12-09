@@ -1,11 +1,11 @@
-'use client' // Убедитесь, что этот компонент выполняется на клиенте
+'use client' 
 import useSWR from 'swr';
 import axios from '@/lib/axios';
 import Loader from '@/components/Loader';
 import { useRouter } from 'next/navigation';  
 import { useState, useEffect } from 'react';
 
-// Функция для загрузки товара
+
 const loadProduct = async (slug) => {
     const url = `/api/products/${slug}`;
     try {
@@ -17,31 +17,27 @@ const loadProduct = async (slug) => {
 };
 
 const OneProduct = () => {
-    const router = useRouter(); // Получаем доступ к маршруту через useRouter
-    const [slug, setSlug] = useState(null);   // Храним slug в состоянии
+    const router = useRouter(); 
+    const [slug, setSlug] = useState(null);  
 
-    // useEffect для обновления slug после того, как роутер будет готов
+
     useEffect(() => {
-        if (router.isReady && router.query.slug) {  // Проверяем, что роутер готов
-            setSlug(router.query.slug);  // Устанавливаем slug
+        if (router.isReady && router.query.slug) { 
+            setSlug(router.query.slug);  
         }
-    }, [router.isReady, router.query.slug]);  // Эффект срабатывает, когда slug меняется
+    }, [router.isReady, router.query.slug]);  
 
-    // Если slug еще не загружен, показываем индикатор загрузки
     if (!slug) return <p>Загрузка...</p>;
 
-    // Используем SWR для получения данных о товаре
     const { data: product, error, isLoading } = useSWR(
-        slug ? `/api/products/${slug}` : null,  // Если slug существует, выполняем запрос
+        slug ? `/api/products/${slug}` : null, 
         loadProduct
     );
 
-    // Обработка состояний загрузки и ошибок
     if (isLoading) return <Loader />;
     if (error) return <p>Ошибка загрузки товара</p>;
     if (!product) return <p>Товар не найден</p>;
 
-    // Отображение данных о товаре
     return (
         <div className="product-detail">
             <h1>{product.name}</h1>

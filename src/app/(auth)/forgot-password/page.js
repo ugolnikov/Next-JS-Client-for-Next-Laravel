@@ -54,7 +54,7 @@ const Page = () => {
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
-                    <Button>Ссылка для сброса пароля электронной почты</Button>
+                    <Button className="rounded">Ссылка для сброса пароля электронной почты</Button>
                 </div>
             </form>
         </>

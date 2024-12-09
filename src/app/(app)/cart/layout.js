@@ -2,16 +2,16 @@
 import { useAuth } from '@/hooks/auth'
 import Loader from '@/components/Loader'
 
-const DashboardLayout = ({ children }) => {
+const CartLayout = ({ children }) => {
     const { user } = useAuth({ middleware: 'auth' })
     if (!user) {
         return <Loader />
-    } else {
+    }
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div>
             {children}
         </div>
-    )}
+    )
 }
 
-export default DashboardLayout
+export default CartLayout
