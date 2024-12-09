@@ -26,10 +26,10 @@ const CartPage = () => {
         }
     }, [cart])
 
-    const handleRemoveItem = async (productId) => {
+    const handleRemoveItem = async (cartId) => { 
         setLoading(true)
         try {
-            await axios.delete(`/api/cart/${productId}`)
+            await axios.delete(`/api/cart/${cartId}`) 
             mutateCart() 
         } catch (error) {
             console.error('Ошибка при удалении товара из корзины', error)
@@ -45,14 +45,16 @@ const CartPage = () => {
     if (loading || !cart) {
         return <Loader /> 
     }
-    console.log(user)
     
 
     return (
         <div className="container mx-auto px-4 pt-6 pb-8">
             <h1 className="text-3xl font-bold text-center text-[#4438ca] mb-8">Корзина</h1>
             {cart.items.length === 0 ? (
-                <p className="text-center text-lg">Ваша корзина пуста</p>
+                <div className='flex flex-col items-center align-items-center'>
+                <p className="text-center text-lg mb-5">Ваша корзина пуста</p>
+                <Button className="rounded" onClick={() => {router.push('/')}}>Перейти к товарам</Button>
+                </div>
             ) : (
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                     <table className="min-w-full table-auto">
@@ -73,12 +75,12 @@ const CartPage = () => {
                                     <td className="px-6 py-4">{item.quantity}</td>
                                     <td className="px-6 py-4">{item.product.price * item.quantity}₽</td>
                                     <td className="px-6 py-4">
-                                        <Button
-                                            onClick={() => handleRemoveItem(item.product.id)}
-                                            className="rounded"
-                                        >
-                                            Удалить
-                                        </Button>
+                                    <Button
+                                        onClick={() => handleRemoveItem(item.id)} 
+                                        className="rounded"
+                                    >
+                                        Удалить
+                                    </Button>
                                     </td>
                                 </tr>
                             ))}
