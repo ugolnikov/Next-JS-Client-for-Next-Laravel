@@ -8,9 +8,7 @@ const CartLayout = ({ children }) => {
         return <Loader />
     }
     return (
-        <div>
-            {children}
-        </div>
+        children
     )
 }
 

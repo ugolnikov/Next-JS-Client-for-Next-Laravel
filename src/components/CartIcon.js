@@ -1,24 +1,12 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/auth'
 import { useRouter } from 'next/navigation'
-import Loader from '@/components/Loader'
 
-const CartIcon = () => {
-    const { cart, isLoading } = useAuth()
-    const [cartCount, setCartCount] = useState(0)
+
+const CartIcon = ({ cartCount }) => {
     const router = useRouter()
-
-    useEffect(() => {
-        if (cart) {
-            const totalItems = cart.items.length
-            setCartCount(totalItems)
-        }
-    }, [cart])
 
     const handleCartClick = () => {
         router.push('/cart')
     }
-    if (isLoading) return <Loader />;
 
     return (
         <div className="relative cursor-pointer" onClick={handleCartClick}>

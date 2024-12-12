@@ -9,7 +9,7 @@ import axios from '@/lib/axios'
 
 const CartPage = () => {
     const { cart, mutateCart, user } = useAuth()
-    
+
     const [loading, setLoading] = useState(false)
     const [totalPrice, setTotalPrice] = useState(0)
     const router = useRouter()
@@ -17,20 +17,23 @@ const CartPage = () => {
         if (!user || user.role !== 'customer') {
             router.push('/login')
         }
-    }, [user, router]) 
+    }, [user, router])
 
     useEffect(() => {
         if (cart && cart.items) {
-            const total = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+            const total = cart.items.reduce(
+                (sum, item) => sum + item.product.price * item.quantity,
+                0,
+            )
             setTotalPrice(total)
         }
     }, [cart])
 
-    const handleRemoveItem = async (cartId) => { 
+    const handleRemoveItem = async cartId => {
         setLoading(true)
         try {
-            await axios.delete(`/api/cart/${cartId}`) 
-            mutateCart() 
+            await axios.delete(`/api/cart/${cartId}`)
+            mutateCart()
         } catch (error) {
             console.error('Ошибка при удалении товара из корзины', error)
         } finally {
@@ -39,64 +42,52 @@ const CartPage = () => {
     }
 
     const handleCheckout = () => {
-        console.log("Оформить заказ")
+        console.log('Оформить заказ')
     }
 
     if (loading || !cart) {
-        return <Loader /> 
+        return <Loader />
     }
-    
 
     return (
-        <div className="container mx-auto px-4 pt-6 pb-8">
-            <h1 className="text-3xl font-bold text-center text-[#4438ca] mb-8">Корзина</h1>
-            {cart.items.length === 0 ? (
-                <div className='flex flex-col items-center align-items-center'>
-                <p className="text-center text-lg mb-5">Ваша корзина пуста</p>
-                <Button className="rounded" onClick={() => {router.push('/')}}>Перейти к товарам</Button>
-                </div>
-            ) : (
-                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                    <table className="min-w-full table-auto">
-                        <thead className="bg-[#4438ca] text-white">
-                            <tr>
-                                <th className="px-6 py-3 text-left">Продукт</th>
-                                <th className="px-6 py-3 text-left">Цена</th>
-                                <th className="px-6 py-3 text-left">Количество</th>
-                                <th className="px-6 py-3 text-left">Сумма</th>
-                                <th className="px-6 py-3 text-left">Удалить</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {cart.items.map((item) => (
-                                <tr key={item.product.id} className="border-b hover:bg-[#dddddd] transition duration-300">
-                                    <td className="px-6 py-4">{item.product.name}</td>
-                                    <td className="px-6 py-4">{item.product.price}₽</td>
-                                    <td className="px-6 py-4">{item.quantity}</td>
-                                    <td className="px-6 py-4">{item.product.price * item.quantity}₽</td>
-                                    <td className="px-6 py-4">
-                                    <Button
-                                        onClick={() => handleRemoveItem(item.id)} 
-                                        className="rounded"
-                                    >
-                                        Удалить
-                                    </Button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <div className="flex justify-between items-center mt-6 px-6 py-4 bg-[#f8f8f8]">
-                        <h2 className="text-xl font-bold">Общая сумма: {totalPrice}₽</h2>
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full  sm:px-10">
+            {cart.items.map(item => (
+                <div
+                    key={item.product.id}
+                    className="flex flex-col md:flex-row justify-between items-center border-b p-4 hover:bg-[#dddddd] transition duration-300">
+                    <div className="w-full md:w-1/4">
+                        <p className="font-semibold">Продукт:</p>
+                        <p>{item.product.name}</p>
+                    </div>
+                    <div className="w-full md:w-1/4">
+                        <p className="font-semibold">Цена:</p>
+                        <p>{item.product.price}₽</p>
+                    </div>
+                    <div className="w-full md:w-1/4">
+                        <p className="font-semibold">Количество:</p>
+                        <p>{item.quantity}</p>
+                    </div>
+                    <div className="w-full md:w-1/4">
+                        <p className="font-semibold">Сумма:</p>
+                        <p>{item.product.price * item.quantity}₽</p>
+                    </div>
+                    <div className="w-full md:w-auto mt-4 md:mt-0">
                         <Button
-                            onClick={handleCheckout}
-                            className="rounded"
-                        >
-                            Оформить заказ
+                            onClick={() => handleRemoveItem(item.id)}
+                            className="rounded">
+                            Удалить
                         </Button>
                     </div>
                 </div>
-            )}
+            ))}
+            <div className="flex justify-between items-center mt-6 px-6 py-4 bg-[#f8f8f8]">
+                <h2 className="text-xl font-bold">
+                    Общая сумма: {totalPrice}₽
+                </h2>
+                <Button onClick={handleCheckout} className="rounded">
+                    Оформить заказ
+                </Button>
+            </div>
         </div>
     )
 }

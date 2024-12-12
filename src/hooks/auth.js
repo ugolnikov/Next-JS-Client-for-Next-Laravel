@@ -148,6 +148,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         forgotPassword,
         resetPassword,
         logout,
+        mutate,
         cart,
         addToCart,
         mutateCart

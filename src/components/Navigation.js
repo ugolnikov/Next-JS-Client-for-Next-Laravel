@@ -9,7 +9,7 @@ import ResponsiveNavLink, {
 import { DropdownButton } from '@/components/DropdownLink'
 import { useAuth } from '@/hooks/auth'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LoginLinks from '@/components/LoginLinks'
 import CartIcon from '@/components/CartIcon'
 
@@ -17,6 +17,18 @@ const Navigation = ({ user }) => {
     const { logout } = useAuth()
     const [open, setOpen] = useState(false)
     const pathname = usePathname()
+
+    const { cart, isLoading } = useAuth()
+    const [cartCount, setCartCount] = useState(0)
+    useEffect(() => {
+        if (cart) {
+            const totalItems = cart.items.length
+            setCartCount(totalItems)
+        }
+    }, [cart])
+
+    if (isLoading) return <Loader />;
+
     return (
         <nav className="bg-white border-b border-gray-100">
             {/* Primary Navigation Menu */}
@@ -53,7 +65,7 @@ const Navigation = ({ user }) => {
                         ) : (
                             <>
                             {user?.role === 'customer' ? (
-                                <CartIcon />
+                                <CartIcon cartCount={cartCount}/>
                             ) : ((null))}
                             
                             <Dropdown
@@ -142,11 +154,20 @@ const Navigation = ({ user }) => {
                                 </ResponsiveNavLink>
                             </>
                         ) : (
+                            <>
+                            {user?.role === 'customer' ? (
+                                <ResponsiveNavLink
+                                href="/cart"
+                                active={pathname === '/cart'}>
+                                Корзина <span className='text-white px-2 py-1 bg-red-900 rounded'>{cartCount}</span>
+                                </ResponsiveNavLink>
+                            ) : ((null))}
                             <ResponsiveNavLink
                                 href="/dashboard"
                                 active={pathname === '/dashboard'}>
                                 Личный кабинет
                             </ResponsiveNavLink>
+                            </>
                         )}
                     </div>
 
