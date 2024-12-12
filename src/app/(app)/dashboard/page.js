@@ -3,9 +3,11 @@ import Header from '@/app/(app)/Header'
 import { useAuth } from '@/hooks/auth'
 import Button from '@/components/Button'
 import axios from '@/lib/axios'
+import { useRouter } from 'next/navigation'
 
 const Dashboard = () => {
     const { user, mutate } = useAuth()
+    const router = useRouter()
     const changeRole = async ({ url }) => {
         try {
             await axios.post(url)
@@ -62,8 +64,7 @@ const Dashboard = () => {
                                     </>
                                 )}
                             </p>
-
-                            <div className="mt-4 text-lg text-gray-700">
+                            {user?.role === 'seller' ? (<div className="mt-4 text-lg text-gray-700">
                                 Статус подтверждения:
                                 {user?.is_verify ? (
                                     <span className="text-green-600">{'  '}ОК{'  '}</span>
@@ -75,17 +76,14 @@ const Dashboard = () => {
                                         <div className="mt-2">
                                             <Button
                                                 className="text-sm rounded !p-2"
-                                                onClick={() =>
-                                                    changeRole({
-                                                        url: '/api/change_role/customer',
-                                                    })
-                                                }>
+                                                onClick={() => router.push('/dashboard/confirmation')}>
                                                 Подтвердить
                                             </Button>
                                         </div>
                                     </>
                                 )}
-                            </div>
+                            </div>) : (null)}
+                            
 
                             {user?.role === 'seller' && (
                                 <div className="mt-8 p-6 bg-gray-50 border rounded-lg shadow-lg">
