@@ -4,9 +4,11 @@ import { useAuth } from '@/hooks/auth'
 import Button from '@/components/Button'
 import axios from '@/lib/axios'
 import { useRouter } from 'next/navigation'
+import Loader from '@/components/Loader'
 
 const Dashboard = () => {
-    const { user, mutate } = useAuth()
+    const { user, mutate, orders, isLoading } = useAuth()
+
     const router = useRouter()
     const changeRole = async ({ url }) => {
         try {
@@ -16,7 +18,7 @@ const Dashboard = () => {
             console.error('Ошибка при смене роли:', error)
         }
     }
-
+    if (isLoading) return <Loader />
     return (
         <>
             <Header title="Личный кабинет" />
@@ -160,17 +162,95 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
-                            <h2 className="text-3xl font-bold text-[#4438ca]">
-                                Ваши заказы:
-                            </h2>
+            {user?.role === 'customer' ? (
+                <div className="py-12">
+                    <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                        <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                            <div className="p-6 bg-white border-b border-gray-200">
+                                <h2 className="text-3xl font-bold text-[#4438ca]">
+                                    Ваши заказы:
+                                </h2>
+                                <div className="mt-4 overflow-x-auto">
+                                    {orders && orders.length > 0 ? (
+                                        <table className="min-w-full bg-white shadow-md rounded-lg">
+                                            <thead>
+                                                <tr className="bg-[#4438ca] text-white text-left">
+                                                    <th className="p-4">
+                                                        № заказа
+                                                    </th>
+                                                    <th className="p-4">
+                                                        Дата
+                                                    </th>
+                                                    <th className="p-4">
+                                                        Статус
+                                                    </th>
+                                                    <th className="p-4">
+                                                        Сумма
+                                                    </th>
+                                                    <th className="p-4">
+                                                        Действия
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {orders.map(order => (
+                                                    <tr
+                                                        key={order.id}
+                                                        className="border-b hover:bg-gray-100">
+                                                        <td className="p-4">
+                                                            {order.order_number}
+                                                        </td>
+                                                        <td className="p-4">
+                                                            {new Date(
+                                                                order.created_at,
+                                                            ).toLocaleDateString(
+                                                                'ru-RU',
+                                                            )}
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <span
+                                                                className={`px-3 py-1 rounded-full text-sm ${
+                                                                    order.status ===
+                                                                    'completed'
+                                                                        ? 'bg-green-100 text-green-700'
+                                                                        : order.status ===
+                                                                            'cancelled'
+                                                                          ? 'bg-red-100 text-red-700'
+                                                                          : 'bg-yellow-100 text-yellow-700'
+                                                                }`}>
+                                                                {order.status}
+                                                            </span>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            {order.total_amount}{' '}
+                                                            ₽
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <Button
+                                                                className="text-sm rounded bg-[#4438ca] text-white px-4 py-2"
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/orders/${order.id}`,
+                                                                    )
+                                                                }>
+                                                                Подробнее
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <p className="text-gray-700 text-center mt-6">
+                                            Заказы отсутствуют.
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            ) : null}
         </>
     )
 }

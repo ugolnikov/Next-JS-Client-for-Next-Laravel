@@ -119,6 +119,21 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     )
 
 
+    const { data: orders, error: ordersError, mutate: mutateOrder } = useSWR('/api/orders', () =>
+        axios
+            .get('/api/orders')
+            .then(res => res.data)
+            .catch(error => {
+                throw error
+            }), {
+                revalidateOnFocus: false,
+                onErrorRetry: (error, key) => {
+                    if (key === '/api/orders' && error.status === 401) return
+                },
+            }
+    )
+
+
     const addToCart = async (productId, quantity) => {
         if (!user) {
             router.push('/login')
@@ -151,6 +166,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         mutate,
         cart,
         addToCart,
-        mutateCart
+        mutateCart,
+        orders,
+        mutateOrder
     }
 }
