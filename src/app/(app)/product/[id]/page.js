@@ -1,5 +1,4 @@
 'use client'
-import useSWR from 'swr'
 import axios from '@/lib/axios'
 import { useState, useEffect } from 'react'
 import Loader from '@/components/Loader'
@@ -13,6 +12,7 @@ import CheckMark from '@/components/CheckMark'
 import Button from '@/components/Button'
 import { useRouter } from 'next/navigation'
 import AddToCart from '@/components/AddToCartButton'
+import { useAuth } from '@/hooks/auth'
 
 const loadProduct = async id => {
     const url = `/api/products/${id}`
@@ -29,6 +29,7 @@ const loadProduct = async id => {
 
 export default function Page({ params }) {
     const router = useRouter()
+    const {user} = useAuth()
     const [id, setId] = useState(null)
     const [product, setProduct] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -147,7 +148,7 @@ export default function Page({ params }) {
                                 </div>
 
                                 <div>
-                                    <AddToCart productId={id}/>
+                                    {user?.role === 'customer' ? (<AddToCart productId={id}/>) : (null)}
                                     <h2 className="text-xl font-semibold my-2 mt-5">
                                         Описание:
                                     </h2>

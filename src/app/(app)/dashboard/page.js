@@ -64,26 +64,33 @@ const Dashboard = () => {
                                     </>
                                 )}
                             </p>
-                            {user?.role === 'seller' ? (<div className="mt-4 text-lg text-gray-700">
-                                Статус подтверждения:
-                                {user?.is_verify ? (
-                                    <span className="text-green-600">{'  '}ОК{'  '}</span>
-                                ) : (
-                                    <>
-                                        <span className="text-red-600">
-                                        {'  '}не подтвержденная{'  '}
+                            {user?.role === 'seller' ? (
+                                <div className="mt-4 text-lg text-gray-700">
+                                    Статус подтверждения:
+                                    {user?.is_verify ? (
+                                        <span className="text-green-600">
+                                            {'  '}ОК{'  '}
                                         </span>
-                                        <div className="mt-2">
-                                            <Button
-                                                className="text-sm rounded !p-2"
-                                                onClick={() => router.push('/dashboard/confirmation')}>
-                                                Подтвердить
-                                            </Button>
-                                        </div>
-                                    </>
-                                )}
-                            </div>) : (null)}
-                            
+                                    ) : (
+                                        <>
+                                            <span className="text-red-600">
+                                                {'  '}не подтвержденная{'  '}
+                                            </span>
+                                            <div className="mt-2">
+                                                <Button
+                                                    className="text-sm rounded !p-2"
+                                                    onClick={() =>
+                                                        router.push(
+                                                            '/dashboard/confirmation',
+                                                        )
+                                                    }>
+                                                    Подтвердить
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            ) : null}
 
                             {user?.role === 'seller' && (
                                 <div className="mt-8 p-6 bg-gray-50 border rounded-lg shadow-lg">
@@ -148,6 +155,18 @@ const Dashboard = () => {
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="py-12">
+                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                        <div className="p-6 bg-white border-b border-gray-200">
+                            <h2 className="text-3xl font-bold text-[#4438ca]">
+                                Ваши заказы:
+                            </h2>
                         </div>
                     </div>
                 </div>
