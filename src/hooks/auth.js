@@ -1,28 +1,37 @@
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import axios from '@/lib/axios'
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { reject } from 'lodash'
 
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
     const csrf = () => axios.get('/sanctum/csrf-cookie')
 
-    const { data: user, error, mutate } = useSWR('/api/user', () =>
-        axios
-            .get('/api/user')
-            .then(res => res.data)
-            .catch(error => {
-                throw error 
-            }), {
-                onErrorRetry: (error, key) => {
-                    if (key === '/api/user' && error.status === 401) return
-                },
-
-            }
+    const {
+        data: user,
+        error,
+        mutate,
+    } = useSWR(
+        '/api/user',
+        () =>
+            axios
+                .get('/api/user')
+                .then(res => res.data)
+                .catch(err => {
+                    if (err.response?.status === 401) {
+                        return null
+                    } else {throw err}
+                    
+                }),
+        {
+            revalidateOnFocus: false,
+            shouldRetryOnError: false,
+            revalidateIfStale: false,
+            revalidateOnReconnect: false
+        },
     )
-    
-
 
     const register = async ({ setErrors, ...props }) => {
         await csrf()
@@ -91,48 +100,59 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
 
     const logout = async () => {
         await csrf()
-        
+
         if (!error) {
-            await axios
-                    .post('/logout')
-                    .then(() => mutate())
+            await axios.post('/logout').then(() => mutate())
         } else {
-            console.log("Ошибка:", error)
+            console.log('Ошибка:', error)
         }
-        
+
         window.location.pathname = '/login'
     }
 
-
-    const { data: cart, error: cartError, mutate: mutateCart } = useSWR('/api/cart', () =>
-        axios
-            .get('/api/cart')
-            .then(res => res.data)
-            .catch(error => {
-                throw error
-            }), {
-                revalidateOnFocus: false,
-                onErrorRetry: (error, key) => {
-                    if (key === '/api/user' && error.status === 401) return
-                },
-            }
+    const {
+        data: cart,
+        error: cartError,
+        mutate: mutateCart,
+    } = useSWR(
+        user ? '/api/cart' : null,
+        () =>
+            axios
+                .get('/api/cart')
+                .then(res => res.data)
+                .catch(error => {
+                    if (error.response?.status === 401) {
+                        return null
+                    }
+                    return null
+                }),
+        {
+            revalidateOnFocus: false,
+            shouldRetryOnError: false,
+        },
     )
 
-
-    const { data: orders, error: ordersError, mutate: mutateOrder } = useSWR('/api/orders', () =>
-        axios
-            .get('/api/orders')
-            .then(res => res.data)
-            .catch(error => {
-                throw error
-            }), {
-                revalidateOnFocus: false,
-                onErrorRetry: (error, key) => {
-                    if (key === '/api/orders' && error.status === 401) return
-                },
-            }
+    const {
+        data: orders,
+        error: ordersError,
+        mutate: mutateOrder,
+    } = useSWR(
+        user ? '/api/orders' : null,
+        () =>
+            axios
+                .get('/api/orders')
+                .then(res => res.data)
+                .catch(error => {
+                    if (error.response?.status === 401) {
+                        return null
+                    }
+                    return null
+                }),
+        {
+            revalidateOnFocus: false,
+            shouldRetryOnError: false,
+        },
     )
-
 
     const addToCart = async (productId, quantity) => {
         if (!user) {
@@ -143,13 +163,15 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         await csrf()
 
         try {
-            await axios.post('/api/cart', { product_id: productId, quantity: quantity })
-            mutateCart() 
+            await axios.post('/api/cart', {
+                product_id: productId,
+                quantity: quantity,
+            })
+            mutateCart()
         } catch (error) {
             console.error('Ошибка при добавлении в корзину:', error)
         }
     }
-
 
     useEffect(() => {
         if (middleware === 'guest' && redirectIfAuthenticated && user)
@@ -168,6 +190,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         addToCart,
         mutateCart,
         orders,
-        mutateOrder
+        mutateOrder,
     }
 }

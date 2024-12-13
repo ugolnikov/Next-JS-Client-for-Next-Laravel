@@ -25,7 +25,9 @@ const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
             .then(res => res.data)
             .catch(err => {
                 throw err
-            })
+            }),
+            {keepPreviousData: true}
+
     )
     const refreshProducts = () => mutate()
     return {
