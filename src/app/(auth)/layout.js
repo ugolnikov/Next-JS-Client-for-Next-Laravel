@@ -4,10 +4,14 @@ import AuthCard from '@/app/(auth)/AuthCard'
 import ApplicationLogo from '@/components/ApplicationLogo'
 import Navigation from '@/components/Navigation'
 import { useAuth } from '@/hooks/auth'
+import Loader from '@/components/Loader'
 
 
 const Layout = ({ children }) => {
-    const { user } = useAuth({ middleware: 'guest' })
+    const { user, isLoading } = useAuth({ middleware: 'guest' })
+    if (isLoading) {
+        return <Loader />
+    }
     return (
         <main>
             <Navigation user={user} />

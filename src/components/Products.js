@@ -148,7 +148,7 @@ const ProductList = () => {
             </div>
 
             {/* Показ текущей страницы */}
-            <p className="text-center mt-3">
+            <p className="text-center mt-3 hidden sm:block">
                 Страница {page} из {products?.last_page}
             </p>
         </>

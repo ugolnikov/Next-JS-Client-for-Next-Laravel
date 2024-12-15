@@ -1,72 +1,73 @@
 'use client'
+import { useState } from 'react'
 import { useAuth } from '@/hooks/auth'
-import Button from '@/components/Button'
-import axios from '@/lib/axios'
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Input from '@/components/Input'
+import axios from '@/lib/axios'
+import Button from '@/components/Button'
 
 const ProfileConfirmation = () => {
-    const { user, mutate } = useAuth()
+    const router = useRouter()
+    const { user, mutate } = useAuth({ middleware: 'auth' })
+    const [logoFile, setLogoFile] = useState(null)
     const [profile, setProfile] = useState({
-        companyName: user?.company_name || '',
+        company_name: user?.company_name || '',
         inn: user?.inn || '',
         address: user?.address || '',
         phone: user?.phone || '',
         logo: user?.logo || '',
     })
-    const [innGood, setinnGood] = useState(false)
-    const [innError, setInnError] = useState(false)
-    const [isProfileConfirmed, setProfileConfirmed] = useState(false)
-    const [logoFile, setLogoFile] = useState(null)
-    const router = useRouter()
 
-    useEffect(() => {
-        if (user?.is_verify) {
-            setProfileConfirmed(true)
-        }
-    }, [user])
+    const [errors, setErrors] = useState({})
+    const [success, setSuccess] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [logoError, setLogoError] = useState('')
+    const [logoSuccess, setLogoSuccess] = useState('')
+    const [isINNVerified, setIsINNVerified] = useState(false)
+    const [isCheckingINN, setIsCheckingINN] = useState(false)
+    const [isLogoUploaded, setIsLogoUploaded] = useState(!!user?.logo)
 
-    const handleINN = async () => {
-        try {
-            const response = await axios.post('/api/validate/inn', {
-                inn: profile.inn,
-            })
-            if (!response.data[0]) {
-                alert('ИНН неверный или не существует.')
-                setInnError(true)
-                return false
-            }
-            setinnGood(true)
-            setProfile(prevProfile => ({
-                ...prevProfile,
-                address: response.data[0].data.address.value || '',
-            }));
-            return true
-        } catch (error) {
-            console.log('Ошибка при проверке ИНН:', error)
-            setInnError(true);
-            return false
-        }
+    const handleChange = e => {
+        const { name, value } = e.target
+        setProfile(prev => ({
+            ...prev,
+            [name]: value,
+        }))
+        // Очищаем ошибку для поля при его изменении
+        setErrors(prev => ({
+            ...prev,
+            [name]: '',
+        }))
     }
 
     const handleLogoChange = event => {
         const file = event.target.files[0]
         if (file) {
+            // Проверка размера файла (например, не более 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                setLogoError('Размер файла не должен превышать 5MB')
+                return
+            }
+            // Проверка типа файла
+            if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                setLogoError('Допускаются только изображения в формате JPEG или PNG')
+                return
+            }
             setLogoFile(file)
+            setLogoError('')
         }
     }
 
     const handleLogoUpload = async () => {
         if (!logoFile) {
-            alert('Пожалуйста, выберите файл для загрузки.')
+            setLogoError('Пожалуйста, выберите файл для загрузки')
             return
         }
 
-        const formData = new FormData()
-        formData.append('logo', logoFile)
-
         try {
+            setIsSubmitting(true)
+            const formData = new FormData()
+            formData.append('logo', logoFile)
+
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/api/upload/logo`,
                 formData,
@@ -80,167 +81,260 @@ const ProfileConfirmation = () => {
                 ...prevProfile,
                 logo: process.env.NEXT_PUBLIC_API_URL + response.data.logoUrl,
             }))
+            setLogoSuccess('Логотип успешно загружен')
+            setLogoError('')
+            setIsLogoUploaded(true)
+            setTimeout(() => setLogoSuccess(''), 3000)
         } catch (error) {
-            console.error('Ошибка при загрузке логотипа:', error)
-            alert('Не удалось загрузить логотип.')
+            setLogoError(
+                error.response?.data?.message ||
+                    'Произошла ошибка при загрузке логотипа',
+            )
+            setIsLogoUploaded(false)
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleINNCheck = async () => {
+        setIsCheckingINN(true)
+        setErrors(prev => ({ ...prev, inn: '' }))
+
+        try {
+            const response = await axios.post('/api/validate/inn', {
+                inn: profile.inn,
+            })
+            setProfile(prev => ({
+                ...prev,
+                address: response.data[0].data.address.value || prev.address,
+            }))
+            
+            setIsINNVerified(true)
+            setSuccess('ИНН успешно проверен')
+            setTimeout(() => setSuccess(''), 3000)
+        } catch (error) {
+            setErrors(prev => ({
+                ...prev,
+                inn: 'Неверный ИНН или ошибка проверки',
+            }))
+            setIsINNVerified(false)
+        } finally {
+            setIsCheckingINN(false)
         }
     }
 
     const handleConfirmProfile = async () => {
-        const isValidINN = await handleINN()
-        if (!isValidINN) return (alert('ИНН является неправильным!'))
+        setIsSubmitting(true)
+        setErrors({})
+        setSuccess('')
 
         try {
-            const response = await axios.post('/api/validate/seller', {
-                ...profile,
-            })
-            mutate()
-            setProfileConfirmed(true)
-            router.push('/dashboard')
+            if (!isINNVerified || !isLogoUploaded) {
+                if (!isINNVerified) {
+                    setErrors(prev => ({
+                        ...prev,
+                        inn: 'Необходимо проверить ИНН перед отправкой формы',
+                    }))
+                }
+                if (!isLogoUploaded) {
+                    setLogoError('Необходимо загрузить логотип перед отправкой формы')
+                }
+                setIsSubmitting(false)
+                return
+            }
+
+            // Преобразуем данные в формат, ожидаемый API
+            const formData = {
+                companyName: profile.company_name,
+                inn: profile.inn,
+                address: profile.address,
+                phone: profile.phone,
+                logo: profile.logo,
+            }
+
+            const response = await axios.post('/api/validate/seller', formData)
+            
+            await mutate()
+            setSuccess('Профиль успешно подтвержден')
+            
+            setTimeout(() => {
+                router.push('/dashboard')
+            }, 2000)
         } catch (error) {
-            console.error('Ошибка при подтверждении профиля:', error)
+            const errorMessage = error.response?.data?.error || 
+                               error.response?.data?.messages || 
+                               'Произошла ошибка при подтверждении профиля'
+            setErrors(prev => ({
+                ...prev,
+                submit: errorMessage
+            }))
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
-    const handleInputChange = field => event => {
-        setProfile(prevProfile => ({
-            ...prevProfile,
-            [field]: event.target.value || '',
-        }))
-    }
-
     return (
-        <>
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <div className="p-6 bg-white border-b border-gray-200">
-                            <h2 className="text-3xl font-bold text-[#4438ca]">
-                                Подтверждение профиля
-                            </h2>
-                            <p className="mt-4 text-lg text-gray-700">
-                                Для завершения регистрации и подтверждения
-                                профиля заполните все поля.
-                            </p>
+        <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-[#4438ca] mb-6">
+                Подтверждение профиля продавца
+            </h2>
 
-                            <div className="mt-8 p-6 bg-gray-50 border rounded-lg shadow-lg">
-                                <h3 className="text-2xl font-semibold text-[#4438ca] mb-4">
-                                    Реквизиты компании
-                                </h3>
+            <div className="space-y-6">
+                {/* Поля формы */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Название компании
+                    </label>
+                    <input
+                        type="text"
+                        name="company_name"
+                        value={profile.company_name}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4438ca] focus:ring-[#4438ca]"
+                    />
+                    {errors.company_name && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.company_name}
+                        </p>
+                    )}
+                </div>
 
-                                {/* Company Name Input */}
-                                <div className="flex flex-col my-5">
-                                    <p className="font-medium text-gray-700">
-                                        Компания:
-                                    </p>
-                                    <Input
-                                        value={profile.companyName}
-                                        onChange={handleInputChange(
-                                            'companyName',
-                                        )}
-                                        placeholder="Введите название компании"
-                                    />
-                                </div>
-
-                                {/* INN Input */}
-                                <div className="flex flex-col my-5">
-                                    <p className="font-medium text-gray-700">
-                                        ИНН:
-                                    </p>
-                                    <div className="flex flex-row w-full">
-                                        <Input
-                                            value={profile.inn}
-                                            onChange={handleInputChange('inn')}
-                                            placeholder="Введите ИНН"
-                                            className={`w-[80%] ${innError ? 'border-red-500' : ''}
-                                                                ${innGood ? 'border-green-500' : ''}`}
-                                            required
-                                        />
-                                        <Button onClick={handleINN} className="w-[20%] rounded">
-                                            Проверить
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                {/* Address Input */}
-                                <div className="flex flex-col my-5">
-                                    <p className="font-medium text-gray-700">
-                                        Адрес:
-                                    </p>
-                                    <Input
-                                        value={profile.address}
-                                        onChange={handleInputChange('address')}
-                                        placeholder="Введите адрес"
-                                    />
-                                </div>
-
-                                {/* Phone Input */}
-                                <div className="flex flex-col my-5">
-                                    <p className="font-medium text-gray-700">
-                                        Телефон:
-                                    </p>
-                                    <Input
-                                        value={profile.phone}
-                                        onChange={handleInputChange('phone')}
-                                        placeholder="Введите телефон"
-                                    />
-                                </div>
-
-                                {/* Logo Upload Section */}
-                                <div className="mt-6 text-center flex flex-row">
-                                    <div>{profile.logo ? (
-                                        <img
-                                            src={profile.logo}
-                                            alt="Логотип компании"
-                                            className="w-40 h-40 object-cover rounded-lg shadow-md border-4"
-                                        />
-                                    ) : (
-                                        <p className="w-40 h-40 object-cover rounded-lg shadow-md border-4 flex justify-center items-center">
-                                            Логотип
-                                            <br /> отсутствует
-                                        </p>
-                                    )}</div>
-                                    <div className='flex flex-col ml-10'>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleLogoChange}
-                                        className="mt-4"
-                                    />
-                                    <Button
-                                        onClick={handleLogoUpload}
-                                        className="mt-2">
-                                        Загрузить логотип
-                                    </Button>
-                                    </div>
-                                    
-                                </div>
-                            </div>
-
-                            {/* Confirm Profile Button */}
-                            {!isProfileConfirmed && (
-                                <div className="mt-6 text-center">
-                                    <Button
-                                        className="text-sm rounded !p-2"
-                                        onClick={handleConfirmProfile}>
-                                        Подтвердить профиль
-                                    </Button>
-                                </div>
-                            )}
-
-                            {/* Profile Confirmation Message */}
-                            {isProfileConfirmed && (
-                                <div className="mt-6 text-center">
-                                    <span className="text-green-600">
-                                        Профиль подтвержден!
-                                    </span>
-                                </div>
-                            )}
-                        </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        ИНН
+                    </label>
+                    <div className="mt-1 flex gap-4">
+                        <input
+                            type="text"
+                            name="inn"
+                            value={profile.inn}
+                            onChange={e => {
+                                handleChange(e)
+                                setIsINNVerified(false) // Сбрасываем верификацию при изменении ИНН
+                            }}
+                            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4438ca] focus:ring-[#4438ca]"
+                        />
+                        <Button
+                            onClick={handleINNCheck}
+                            disabled={!profile.inn || isCheckingINN}
+                            className="whitespace-nowrap rounded">
+                            {isCheckingINN ? 'Проверка...' : 'Проверить ИНН'}
+                        </Button>
                     </div>
+                    {errors.inn && (
+                        <p className="mt-1 text-sm text-red-600">{errors.inn}</p>
+                    )}
+                    {isINNVerified && (
+                        <p className="mt-1 text-sm text-green-600">
+                            ИНН успешно проверен
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Адрес
+                    </label>
+                    <input
+                        type="text"
+                        name="address"
+                        value={profile.address}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4438ca] focus:ring-[#4438ca]"
+                    />
+                    {errors.address && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.address}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Телефон
+                    </label>
+                    <input
+                        type="tel"
+                        name="phone"
+                        value={profile.phone}
+                        onChange={handleChange}
+                        placeholder="+7XXXXXXXXXX"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#4438ca] focus:ring-[#4438ca]"
+                    />
+                    {errors.phone && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.phone}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                        Логотип компании {!isLogoUploaded && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="mt-1 flex items-center gap-4">
+                        <input
+                            type="file"
+                            onChange={handleLogoChange}
+                            accept="image/jpeg,image/png"
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#4438ca] file:text-white hover:file:bg-[#19144d]"
+                        />
+                        <Button
+                            onClick={handleLogoUpload}
+                            disabled={!logoFile || isSubmitting}
+                            className="rounded">
+                            {isSubmitting ? 'Загрузка...' : 'Загрузить'}
+                        </Button>
+                    </div>
+                    {logoError && (
+                        <p className="mt-1 text-sm text-red-600">{logoError}</p>
+                    )}
+                    {logoSuccess && (
+                        <p className="mt-1 text-sm text-green-600">
+                            {logoSuccess}
+                        </p>
+                    )}
+                    {profile.logo && (
+                        <div className="mt-4">
+                            <img
+                                src={profile.logo}
+                                alt="Логотип компании"
+                                className="w-32 h-32 object-cover rounded-lg"
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* Кнопка подтверждения */}
+                <div className="flex flex-col items-center gap-4 mt-6">
+                    <Button
+                        onClick={handleConfirmProfile}
+                        disabled={isSubmitting || !isINNVerified || !isLogoUploaded}
+                        className={`w-full rounded ${
+                            (!isINNVerified || !isLogoUploaded) ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}>
+                        {isSubmitting
+                            ? 'Обработка...'
+                            : 'Подтвердить профиль'}
+                    </Button>
+                    
+                    {(!isINNVerified || !isLogoUploaded) && (
+                        <p className="text-sm text-yellow-600">
+                            Для подтверждения профиля необходимо:
+                            {!isINNVerified && <span className="block">- Проверить ИНН</span>}
+                            {!isLogoUploaded && <span className="block">- Загрузить логотип</span>}
+                        </p>
+                    )}
+                    
+                    {errors.submit && (
+                        <p className="text-sm text-red-600">{errors.submit}</p>
+                    )}
+                    {success && (
+                        <p className="text-sm text-green-600">{success}</p>
+                    )}
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 

@@ -6,12 +6,16 @@ import Loader from '@/components/Loader'
 import Button from '@/components/Button'
 import { useRouter } from 'next/navigation'
 import axios from '@/lib/axios'
+import Header from '@/components/Header'
+import Image from 'next/image'
 
 const CartPage = () => {
     const { cart, mutateCart, user } = useAuth()
 
     const [loading, setLoading] = useState(false)
     const [totalPrice, setTotalPrice] = useState(0)
+
+    
     const router = useRouter()
     useEffect(() => {
         if (!user || user.role !== 'customer') {
@@ -42,53 +46,83 @@ const CartPage = () => {
     }
 
     const handleCheckout = () => {
-        console.log('Оформить заказ')
+        router.push('/cart/checkout')
     }
 
     if (loading || !cart) {
         return <Loader />
     }
 
+    if (!cart || cart.items.length === 0) {
+        return (
+            <div className="max-w-2xl mx-auto mt-10 p-6">
+                <p className="text-center text-gray-600">
+                    Ваша корзина пуста. Добавьте товары для оформления заказа.
+                </p>
+            </div>
+        )
+    }
+    
     return (
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden w-full  sm:px-10">
-            {cart.items.map(item => (
-                <div
-                    key={item.product.id}
-                    className="flex flex-col md:flex-row justify-between items-center border-b p-4 hover:bg-[#dddddd] transition duration-300">
-                    <div className="w-full md:w-1/4">
-                        <p className="font-semibold">Продукт:</p>
-                        <p>{item.product.name}</p>
-                    </div>
-                    <div className="w-full md:w-1/4">
-                        <p className="font-semibold">Цена:</p>
-                        <p>{item.product.price}₽</p>
-                    </div>
-                    <div className="w-full md:w-1/4">
-                        <p className="font-semibold">Количество:</p>
-                        <p>{item.quantity}</p>
-                    </div>
-                    <div className="w-full md:w-1/4">
-                        <p className="font-semibold">Сумма:</p>
-                        <p>{item.product.price * item.quantity}₽</p>
-                    </div>
-                    <div className="w-full md:w-auto mt-4 md:mt-0">
-                        <Button
-                            onClick={() => handleRemoveItem(item.id)}
-                            className="rounded">
-                            Удалить
-                        </Button>
-                    </div>
+        <>
+        <Header title="Корзина"/>
+        <div className="min-h-[20%] py-12 flex flex-col">
+            <div className="flex-grow bg-white rounded-lg shadow-lg overflow-hidden w-full sm:px-10 mb-6 flex align-center justify-center flex-col">
+                {cart.items.map(item => {
+                    const images = JSON.parse(item.product.images || '[]')
+                    const firstImage = images[0] || '/placeholder.jpg' // Путь к изображению-заглушке
+
+                    return (
+                        <div
+                            key={item.product.id}
+                            className="flex flex-col md:flex-row justify-between items-center border-b p-4 hover:bg-[#dddddd] transition duration-300">
+                            <div className="w-full md:w-1/5 flex justify-center md:justify-start mb-4 md:mb-0">
+                                <div className="relative w-24 h-24">
+                                    <Image
+                                        src={firstImage}
+                                        alt={item.product.name}
+                                        fill
+                                        className="object-cover rounded-lg"
+                                    />
+                                </div>
+                            </div>
+                            <div className="w-full md:w-1/5">
+                                <p className="font-semibold">Продукт:</p>
+                                <p>{item.product.name}</p>
+                            </div>
+                            <div className="w-full md:w-1/5">
+                                <p className="font-semibold">Цена:</p>
+                                <p>{item.product.price}₽</p>
+                            </div>
+                            <div className="w-full md:w-1/5">
+                                <p className="font-semibold">Количество:</p>
+                                <p>{item.quantity}</p>
+                            </div>
+                            <div className="w-full md:w-1/5">
+                                <p className="font-semibold">Сумма:</p>
+                                <p>{item.product.price * item.quantity}₽</p>
+                            </div>
+                            <div className="w-full md:w-auto mt-4 md:mt-0">
+                                <Button
+                                    onClick={() => handleRemoveItem(item.id)}
+                                    className="rounded">
+                                    Удалить
+                                </Button>
+                            </div>
+                        </div>
+                    )
+                })}
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 px-6 py-4 bg-[#f8f8f8]">
+                    <h2 className="text-xl font-bold">
+                        Общая сумма: {totalPrice}₽
+                    </h2>
+                    <Button onClick={handleCheckout} className="rounded">
+                        Перейти к оформлению
+                    </Button>
                 </div>
-            ))}
-            <div className="flex justify-between items-center mt-6 px-6 py-4 bg-[#f8f8f8]">
-                <h2 className="text-xl font-bold">
-                    Общая сумма: {totalPrice}₽
-                </h2>
-                <Button onClick={handleCheckout} className="rounded">
-                    Оформить заказ
-                </Button>
             </div>
         </div>
+        </>
     )
 }
 

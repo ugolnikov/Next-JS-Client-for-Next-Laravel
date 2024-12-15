@@ -13,6 +13,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         data: user,
         error,
         mutate,
+        isLoading
     } = useSWR(
         '/api/user',
         () =>
@@ -22,14 +23,12 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
                 .catch(err => {
                     if (err.response?.status === 401) {
                         return null
-                    } else {throw err}
-                    
+                    }
+                    throw err
                 }),
         {
             revalidateOnFocus: false,
             shouldRetryOnError: false,
-            revalidateIfStale: false,
-            revalidateOnReconnect: false
         },
     )
 
@@ -97,10 +96,23 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
                 setErrors(error.response.data.errors)
             })
     }
+    const updatePhone = async (phone) => {
+        await csrf()
+    
+        try {
+            await axios.post('/api/update-phone', { phone })
+            await mutate() 
+            return { success: true }
+        } catch (error) {
+            if (error.response?.status === 422) {
+                return { success: false, errors: error.response.data.errors }
+            }
+            throw error
+        }
+    }
 
     const logout = async () => {
         await csrf()
-
         if (!error) {
             await axios.post('/logout').then(() => mutate())
         } else {
@@ -148,10 +160,6 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
                     }
                     return null
                 }),
-        {
-            revalidateOnFocus: false,
-            shouldRetryOnError: false,
-        },
     )
 
     const addToCart = async (productId, quantity) => {
@@ -174,22 +182,31 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     useEffect(() => {
-        if (middleware === 'guest' && redirectIfAuthenticated && user)
+        if (isLoading) return
+
+        if (middleware === 'guest' && redirectIfAuthenticated && user) {
             router.push(redirectIfAuthenticated)
-        if (middleware === 'auth' && error) logout()
-    }, [user, error])
+        }
+
+        if (middleware === 'auth' && !user) {
+            router.push('/login')
+        }
+    }, [user, error, isLoading, middleware, redirectIfAuthenticated])
+
     return {
         user,
         register,
         login,
         forgotPassword,
         resetPassword,
-        logout,
+        updatePhone,
         mutate,
         cart,
         addToCart,
         mutateCart,
         orders,
         mutateOrder,
+        logout,
+        isLoading
     }
 }

@@ -1,15 +1,64 @@
 'use client'
-import Header from '@/app/(app)/Header'
+import Header from '@/components/Header'
 import { useAuth } from '@/hooks/auth'
 import Button from '@/components/Button'
 import axios from '@/lib/axios'
 import { useRouter } from 'next/navigation'
 import Loader from '@/components/Loader'
+import { useState } from 'react'
 
 const Dashboard = () => {
-    const { user, mutate, orders, isLoading } = useAuth()
-
+    const { user, mutate, orders, isLoading, updatePhone } = useAuth()
     const router = useRouter()
+    
+
+    const [isEditingPhone, setIsEditingPhone] = useState(false)
+    const [newPhone, setNewPhone] = useState('')
+    const [phoneError, setPhoneError] = useState('')
+    const [phoneSuccess, setPhoneSuccess] = useState(false)
+
+    const getStatusText = status => {
+        switch (status) {
+            case 'pending':
+                return 'В обработке'
+            case 'paid':
+                return 'Оплачен'
+            case 'shipped':
+                return 'Доставлен'
+            case 'completed':
+                return 'Выполнен'
+            case 'cancelled':
+                return 'Отменён'
+            default:
+                return status
+        }
+    }
+    const handlePhoneSubmit = async (e) => {
+        e.preventDefault()
+        setPhoneError('')
+        setPhoneSuccess(false)
+
+
+        const phoneRegex = /^\+7\d{10}$/
+        if (!phoneRegex.test(newPhone)) {
+            setPhoneError('Введите корректный номер телефона в формате +7XXXXXXXXXX')
+            return
+        }
+
+        try {
+            const result = await updatePhone(newPhone)
+            if (result.success) {
+                setPhoneSuccess(true)
+                setIsEditingPhone(false)
+                setTimeout(() => setPhoneSuccess(false), 3000)
+            } else {
+                setPhoneError(result.errors?.phone?.[0] || 'Произошла ошибка')
+            }
+        } catch (error) {
+            setPhoneError('Произошла ошибка при обновлении номера')
+        }
+    }
+
     const changeRole = async ({ url }) => {
         try {
             await axios.post(url)
@@ -18,7 +67,9 @@ const Dashboard = () => {
             console.error('Ошибка при смене роли:', error)
         }
     }
+
     if (isLoading) return <Loader />
+
     return (
         <>
             <Header title="Личный кабинет" />
@@ -32,6 +83,51 @@ const Dashboard = () => {
                             <p className="mt-4 text-lg text-gray-700">
                                 Ваш email: {user?.email}
                             </p>
+
+                            {/* Блок с телефоном */}
+                            <div className="mt-4 text-lg text-gray-700">
+                                <div className="flex items-center gap-4">
+                                    <span>Телефон: {user?.phone || 'Не указан'}</span>
+                                    <Button
+                                        onClick={() => {
+                                            setIsEditingPhone(!isEditingPhone)
+                                            setNewPhone(user?.phone || '')
+                                            setPhoneError('')
+                                        }}
+                                        className="text-sm rounded !p-1">
+                                        {isEditingPhone ? 'Отмена' : 'Изменить'}
+                                    </Button>
+                                </div>
+
+                                {isEditingPhone && (
+                                    <form onSubmit={handlePhoneSubmit} className="mt-4">
+                                        <div className="flex items-center gap-4">
+                                            <input
+                                                type="tel"
+                                                value={newPhone}
+                                                onChange={(e) => setNewPhone(e.target.value)}
+                                                placeholder="+7XXXXXXXXXX"
+                                                className="border-gray-300 focus:border-[#4438ca] focus:ring-[#4438ca] rounded-md shadow-sm"
+                                            />
+                                            <Button type="submit" className="rounded">
+                                                Сохранить
+                                            </Button>
+                                        </div>
+                                        {phoneError && (
+                                            <p className="mt-2 text-sm text-red-600">
+                                                {phoneError}
+                                            </p>
+                                        )}
+                                    </form>
+                                )}
+
+                                {phoneSuccess && (
+                                    <p className="mt-2 text-sm text-green-600">
+                                        Номер телефона успешно обновлён
+                                    </p>
+                                )}
+                            </div>
+
                             <p className="mt-4 text-lg text-gray-700">
                                 Роль:
                                 {user?.role === 'seller' ? (
@@ -66,94 +162,117 @@ const Dashboard = () => {
                                     </>
                                 )}
                             </p>
-                            {user?.role === 'seller' ? (
-                                <div className="mt-4 text-lg text-gray-700">
-                                    Статус подтверждения:
-                                    {user?.is_verify ? (
-                                        <span className="text-green-600">
-                                            {'  '}ОК{'  '}
-                                        </span>
-                                    ) : (
-                                        <>
-                                            <span className="text-red-600">
-                                                {'  '}не подтвержденная{'  '}
-                                            </span>
-                                            <div className="mt-2">
-                                                <Button
-                                                    className="text-sm rounded !p-2"
-                                                    onClick={() =>
-                                                        router.push(
-                                                            '/dashboard/confirmation',
-                                                        )
-                                                    }>
-                                                    Подтвердить
-                                                </Button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            ) : null}
 
                             {user?.role === 'seller' && (
-                                <div className="mt-8 p-6 bg-gray-50 border rounded-lg shadow-lg">
-                                    <h3 className="text-2xl font-semibold text-[#4438ca] mb-4">
-                                        Реквизиты компании
-                                    </h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="flex flex-col">
-                                            <p className="font-medium text-gray-700">
-                                                Компания:
-                                            </p>
-                                            <p className="text-lg text-gray-900">
-                                                {user?.company_name
-                                                    ? user.company_name
-                                                    : 'отсутствует'}
-                                            </p>
+                                <div className="mt-8">
+                                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                                        {/* Шапка с логотипом и названием компании */}
+                                        <div className="relative h-48 bg-gradient-to-r from-[#4438ca] to-[#6d64ff]">
+                                            <div className="absolute -bottom-12 left-8">
+                                                {user?.logo ? (
+                                                    <img
+                                                        src={user.logo}
+                                                        alt="Логотип компании"
+                                                        className="w-24 h-24 rounded-lg border-4 border-white shadow-lg object-cover bg-white"
+                                                    />
+                                                ) : (
+                                                    <div className="w-24 h-24 rounded-lg border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+                                                        <svg 
+                                                            className="w-12 h-12 text-gray-400" 
+                                                            fill="none" 
+                                                            stroke="currentColor" 
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path 
+                                                                strokeLinecap="round" 
+                                                                strokeLinejoin="round" 
+                                                                strokeWidth="2" 
+                                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="absolute bottom-4 left-40">
+                                                <h3 className="text-2xl font-bold text-white">
+                                                    {user?.company_name || 'Название компании не указано'}
+                                                </h3>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col">
-                                            <p className="font-medium text-gray-700">
-                                                ИНН:
-                                            </p>
-                                            <p className="text-lg text-gray-900">
-                                                {user?.inn
-                                                    ? user.inn
-                                                    : 'отсутствует'}
-                                            </p>
+
+                                        {/* Основная информация */}
+                                        <div className="pt-16 pb-8 px-8">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                {/* Статус верификации */}
+                                                <div className="col-span-2 flex">
+                                                    <div className={`inline-flex items-center px-4 py-2 rounded-full ${
+                                                        user?.is_verify 
+                                                            ? 'bg-green-100 text-green-800' 
+                                                            : 'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                        <svg 
+                                                            className={`w-5 h-5 mr-2 ${
+                                                                user?.is_verify 
+                                                                    ? 'text-green-500' 
+                                                                    : 'text-yellow-500'
+                                                            }`}
+                                                            fill="currentColor" 
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            {user?.is_verify ? (
+                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                                            ) : (
+                                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                                                            )}
+                                                        </svg>
+                                                        <span className="font-medium">
+                                                            {user?.is_verify 
+                                                                ? 'Верифицированный продавец' 
+                                                                : 'Ожидает верификации'}
+                                                        </span>
+                                                    </div>
+                                                    {!user?.is_verify && (
+                                                        <Button
+                                                            className="ml-4 text-sm rounded"
+                                                            onClick={() => router.push('/dashboard/confirmation')}>
+                                                            Пройти верификацию
+                                                        </Button>
+                                                    )}
+                                                </div>
+
+                                                {/* Контактная информация */}
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-gray-500">ИНН</h4>
+                                                        <p className="mt-1 text-lg font-medium">
+                                                            {user?.inn || 'Не указан'}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-gray-500">Телефон</h4>
+                                                        <p className="mt-1 text-lg font-medium">
+                                                            {user?.phone || 'Не указан'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Адрес */}
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-gray-500">Адрес</h4>
+                                                        <p className="mt-1 text-lg font-medium">
+                                                            {user?.address || 'Не указан'}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-gray-500">Email</h4>
+                                                        <p className="mt-1 text-lg font-medium">
+                                                            {user?.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-col">
-                                            <p className="font-medium text-gray-700">
-                                                Адрес:
-                                            </p>
-                                            <p className="text-lg text-gray-900">
-                                                {user?.address
-                                                    ? user.address
-                                                    : 'отсутствует'}
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <p className="font-medium text-gray-700">
-                                                Телефон:
-                                            </p>
-                                            <p className="text-lg text-gray-900">
-                                                {user?.phone
-                                                    ? user.phone
-                                                    : 'отсутствует'}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 text-center">
-                                        {user?.logo ? (
-                                            <img
-                                                src={user.logo}
-                                                alt="Логотип компании"
-                                                className="w-40 h-40 object-cover rounded-lg shadow-md mx-auto"
-                                            />
-                                        ) : (
-                                            <p className="w-40 h-40 object-cover rounded-lg shadow-md mx-auto flex justify-center items-center">
-                                                Логотип
-                                                <br /> отсутствует
-                                            </p>
-                                        )}
                                     </div>
                                 </div>
                             )}
@@ -163,7 +282,7 @@ const Dashboard = () => {
             </div>
 
             {user?.role === 'customer' ? (
-                <div className="py-12">
+                <div className="pb-12">
                     <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
                         <div className="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                             <div className="p-6 bg-white border-b border-gray-200">
@@ -218,7 +337,7 @@ const Dashboard = () => {
                                                                           ? 'bg-red-100 text-red-700'
                                                                           : 'bg-yellow-100 text-yellow-700'
                                                                 }`}>
-                                                                {order.status}
+                                                                {getStatusText(order.status)}
                                                             </span>
                                                         </td>
                                                         <td className="p-4">
@@ -230,7 +349,7 @@ const Dashboard = () => {
                                                                 className="text-sm rounded bg-[#4438ca] text-white px-4 py-2"
                                                                 onClick={() =>
                                                                     router.push(
-                                                                        `/orders/${order.id}`,
+                                                                        `dashboard/orders/${order.order_number}`,
                                                                     )
                                                                 }>
                                                                 Подробнее

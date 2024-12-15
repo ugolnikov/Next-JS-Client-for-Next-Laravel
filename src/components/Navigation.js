@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import LoginLinks from '@/components/LoginLinks'
 import CartIcon from '@/components/CartIcon'
+import Loader from '@/components/Loader'
 
 const Navigation = ({ user }) => {
     const { logout } = useAuth()
@@ -173,9 +174,10 @@ const Navigation = ({ user }) => {
                                         href="/cart"
                                         active={pathname === '/cart'}>
                                         Корзина{' '}
-                                        <span className="text-white px-2 py-1 bg-red-900 rounded">
+                                        {!cartCount ? (null) : (<span className="text-white px-2 py-1 bg-red-900 rounded">
                                             {cartCount}
-                                        </span>
+                                        </span>)}
+                                        
                                     </ResponsiveNavLink>
                                 ) : null}
                                 <ResponsiveNavLink

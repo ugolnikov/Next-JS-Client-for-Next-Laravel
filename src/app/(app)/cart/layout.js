@@ -3,13 +3,17 @@ import { useAuth } from '@/hooks/auth'
 import Loader from '@/components/Loader'
 
 const CartLayout = ({ children }) => {
-    const { user } = useAuth({ middleware: 'auth' })
-    if (!user) {
+    const { user, isLoading } = useAuth({ middleware: 'auth' })
+
+    if (isLoading) {
         return <Loader />
     }
-    return (
-        children
-    )
+
+    if (!user) {
+        return null
+    }
+
+    return <div className="min-h-[calc(100vh-64px-200px)] bg-gray-100">{children}</div>
 }
 
 export default CartLayout
