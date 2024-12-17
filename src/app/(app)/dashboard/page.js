@@ -10,19 +10,31 @@ import { useState } from 'react'
 const Dashboard = () => {
     const { user, mutate, orders, isLoading, updatePhone } = useAuth()
     const router = useRouter()
-    
 
     const [isEditingPhone, setIsEditingPhone] = useState(false)
     const [newPhone, setNewPhone] = useState('')
     const [phoneError, setPhoneError] = useState('')
     const [phoneSuccess, setPhoneSuccess] = useState(false)
 
+    const getStatusColor = status => {
+        switch (status) {
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800'
+            case 'shipped':
+                return 'bg-blue-100 text-blue-800'
+            case 'completed':
+                return 'bg-green-100 text-green-800'
+            case 'cancelled':
+                return 'bg-red-100 text-red-800'
+            default:
+                return 'bg-gray-100 text-gray-800'
+        }
+    }
+
     const getStatusText = status => {
         switch (status) {
             case 'pending':
-                return 'В обработке'
-            case 'paid':
-                return 'Оплачен'
+                return 'Ожидает обработки'
             case 'shipped':
                 return 'Доставлен'
             case 'completed':
@@ -33,15 +45,16 @@ const Dashboard = () => {
                 return status
         }
     }
-    const handlePhoneSubmit = async (e) => {
+    const handlePhoneSubmit = async e => {
         e.preventDefault()
         setPhoneError('')
         setPhoneSuccess(false)
 
-
         const phoneRegex = /^\+7\d{10}$/
         if (!phoneRegex.test(newPhone)) {
-            setPhoneError('Введите корректный номер телефона в формате +7XXXXXXXXXX')
+            setPhoneError(
+                'Введите корректный номер телефона в формате +7XXXXXXXXXX',
+            )
             return
         }
 
@@ -87,7 +100,9 @@ const Dashboard = () => {
                             {/* Блок с телефоном */}
                             <div className="mt-4 text-lg text-gray-700">
                                 <div className="flex items-center gap-4">
-                                    <span>Телефон: {user?.phone || 'Не указан'}</span>
+                                    <span>
+                                        Телефон: {user?.phone || 'Не указан'}
+                                    </span>
                                     <Button
                                         onClick={() => {
                                             setIsEditingPhone(!isEditingPhone)
@@ -100,16 +115,22 @@ const Dashboard = () => {
                                 </div>
 
                                 {isEditingPhone && (
-                                    <form onSubmit={handlePhoneSubmit} className="mt-4">
+                                    <form
+                                        onSubmit={handlePhoneSubmit}
+                                        className="mt-4">
                                         <div className="flex items-center gap-4">
                                             <input
                                                 type="tel"
                                                 value={newPhone}
-                                                onChange={(e) => setNewPhone(e.target.value)}
+                                                onChange={e =>
+                                                    setNewPhone(e.target.value)
+                                                }
                                                 placeholder="+7XXXXXXXXXX"
                                                 className="border-gray-300 focus:border-[#4438ca] focus:ring-[#4438ca] rounded-md shadow-sm"
                                             />
-                                            <Button type="submit" className="rounded">
+                                            <Button
+                                                type="submit"
+                                                className="rounded">
                                                 Сохранить
                                             </Button>
                                         </div>
@@ -177,16 +198,15 @@ const Dashboard = () => {
                                                     />
                                                 ) : (
                                                     <div className="w-24 h-24 rounded-lg border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
-                                                        <svg 
-                                                            className="w-12 h-12 text-gray-400" 
-                                                            fill="none" 
-                                                            stroke="currentColor" 
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path 
-                                                                strokeLinecap="round" 
-                                                                strokeLinejoin="round" 
-                                                                strokeWidth="2" 
+                                                        <svg
+                                                            className="w-12 h-12 text-gray-400"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth="2"
                                                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                                                             />
                                                         </svg>
@@ -194,78 +214,102 @@ const Dashboard = () => {
                                                 )}
                                             </div>
                                             <div className="absolute bottom-4 left-40">
-                                                <h3 className="text-2xl font-bold text-white">
-                                                    {user?.company_name || 'Название компании не указано'}
+                                                <h3 className="text-xl sm:text-2xl font-bold text-white">
+                                                    {user?.company_name ||
+                                                        'Название компании не указано'}
                                                 </h3>
                                             </div>
                                         </div>
 
                                         {/* Основная информация */}
-                                        <div className="pt-16 pb-8 px-8">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="pt-16 pb-8 px-4 sm:px-8">
+                                            <div className="flex-col flex sm:grid sm:grid-cols-1 md:grid-cols-2 gap-8">
                                                 {/* Статус верификации */}
-                                                <div className="col-span-2 flex">
-                                                    <div className={`inline-flex items-center px-4 py-2 rounded-full ${
-                                                        user?.is_verify 
-                                                            ? 'bg-green-100 text-green-800' 
-                                                            : 'bg-yellow-100 text-yellow-800'
-                                                    }`}>
-                                                        <svg 
+                                                <div className="col-span-2 flex flex-col align-items-center justify-center sm:flex-row mb-4 sm:mb-0 w-full items-center sm:justify-evenly">
+                                                    <div
+                                                        className={`inline-flex items-center px-4 py-2 rounded-full mb-2 sm:mb-0 ${
+                                                            user?.is_verify
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-yellow-100 text-yellow-800'
+                                                        }`}>
+                                                        <svg
                                                             className={`w-5 h-5 mr-2 ${
-                                                                user?.is_verify 
-                                                                    ? 'text-green-500' 
+                                                                user?.is_verify
+                                                                    ? 'text-green-500'
                                                                     : 'text-yellow-500'
                                                             }`}
-                                                            fill="currentColor" 
-                                                            viewBox="0 0 20 20"
-                                                        >
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20">
                                                             {user?.is_verify ? (
-                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                                    clipRule="evenodd"
+                                                                />
                                                             ) : (
-                                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                                    clipRule="evenodd"
+                                                                />
                                                             )}
                                                         </svg>
                                                         <span className="font-medium">
-                                                            {user?.is_verify 
-                                                                ? 'Верифицированный продавец' 
+                                                            {user?.is_verify
+                                                                ? 'Верифицированный продавец'
                                                                 : 'Ожидает верификации'}
                                                         </span>
                                                     </div>
                                                     {!user?.is_verify && (
                                                         <Button
-                                                            className="ml-4 text-sm rounded"
-                                                            onClick={() => router.push('/dashboard/confirmation')}>
+                                                            className="ml-0 sm:ml-4 text-sm rounded"
+                                                            onClick={() =>
+                                                                router.push(
+                                                                    '/dashboard/confirmation',
+                                                                )
+                                                            }>
                                                             Пройти верификацию
                                                         </Button>
                                                     )}
                                                 </div>
 
                                                 {/* Контактная информация */}
-                                                <div className="space-y-4">
+                                                <div className="space-y-1 sm:space-y-4 flex-col">
                                                     <div>
-                                                        <h4 className="text-sm font-medium text-gray-500">ИНН</h4>
+                                                        <h4 className="text-sm font-medium text-gray-500">
+                                                            ИНН
+                                                        </h4>
                                                         <p className="mt-1 text-lg font-medium">
-                                                            {user?.inn || 'Не указан'}
+                                                            {user?.inn ||
+                                                                'Не указан'}
                                                         </p>
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-sm font-medium text-gray-500">Телефон</h4>
+                                                        <h4 className="text-sm font-medium text-gray-500">
+                                                            Телефон
+                                                        </h4>
                                                         <p className="mt-1 text-lg font-medium">
-                                                            {user?.phone || 'Не указан'}
+                                                            {user?.phone ||
+                                                                'Не указан'}
                                                         </p>
                                                     </div>
                                                 </div>
 
                                                 {/* Адрес */}
-                                                <div className="space-y-4">
+                                                <div className="space-y-1 sm:space-y-4">
                                                     <div>
-                                                        <h4 className="text-sm font-medium text-gray-500">Адрес</h4>
+                                                        <h4 className="text-sm font-medium text-gray-500">
+                                                            Адрес
+                                                        </h4>
                                                         <p className="mt-1 text-lg font-medium">
-                                                            {user?.address || 'Не указан'}
+                                                            {user?.address ||
+                                                                'Не указан'}
                                                         </p>
                                                     </div>
                                                     <div>
-                                                        <h4 className="text-sm font-medium text-gray-500">Email</h4>
+                                                        <h4 className="text-sm font-medium text-gray-500">
+                                                            Email
+                                                        </h4>
                                                         <p className="mt-1 text-lg font-medium">
                                                             {user?.email}
                                                         </p>
@@ -329,15 +373,8 @@ const Dashboard = () => {
                                                         <td className="p-4">
                                                             <span
                                                                 className={`px-3 py-1 rounded-full text-sm ${
-                                                                    order.status ===
-                                                                    'completed'
-                                                                        ? 'bg-green-100 text-green-700'
-                                                                        : order.status ===
-                                                                            'cancelled'
-                                                                          ? 'bg-red-100 text-red-700'
-                                                                          : 'bg-yellow-100 text-yellow-700'
-                                                                }`}>
-                                                                {getStatusText(order.status)}
+                                                                    getStatusColor(order.status)}`}>
+                                                                {getStatusText(order.status,)}
                                                             </span>
                                                         </td>
                                                         <td className="p-4">

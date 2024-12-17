@@ -5,6 +5,7 @@ import Loader from '@/components/Loader'
 import Button from '@/components/Button'
 import { useRouter } from 'next/navigation'
 import ImageWithLoader from '@/components/ImageWithLoader'
+import Modal from '@/components/Modal'
 
 const loadOrder = async orderNumber => {
     const url = `/api/orders/${orderNumber}`
@@ -26,6 +27,29 @@ export default function Page({ params }) {
     const [isLoading, setIsLoading] = useState(true)
     const [isError, setIsError] = useState(false)
     const [notFound, setNotFound] = useState(false)
+    const [error, setError] = useState(null)
+    const [showModal, setShowModal] = useState(false)
+    const [modalMessage, setModalMessage] = useState('')
+    const [selectedOrderId, setSelectedOrderId] = useState(null)
+
+    const fetchOrder = async () => {
+        if (!orderNumber) return
+        try {
+            setIsLoading(true)
+            setIsError(false)
+            setNotFound(false)
+            const data = await loadOrder(orderNumber)
+            if (data === null) {
+                setNotFound(true)
+            } else {
+                setOrder(data)
+            }
+        } catch (error) {
+            setIsError(true)
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     useEffect(() => {
         const fetchOrderNumber = async () => {
@@ -39,27 +63,29 @@ export default function Page({ params }) {
     }, [params])
 
     useEffect(() => {
-        const fetchOrder = async () => {
-            if (!orderNumber) return
-            try {
-                setIsLoading(true)
-                setIsError(false)
-                setNotFound(false)
-                const data = await loadOrder(orderNumber)
-                if (data === null) {
-                    setNotFound(true)
-                } else {
-                    setOrder(data)
-                }
-            } catch (error) {
-                setIsError(true)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
         fetchOrder()
     }, [orderNumber])
+
+    const handleSend = async () => {
+        setSelectedOrderId(orderNumber)
+        setModalMessage('Вы уверены, что получили этот товар?')
+        setShowModal(true)
+    }
+
+    const confirmSend = async () => {
+        try {
+            await axios.put(`/api/orders/${orderNumber}/status`, {
+                status: 'completed',
+                orderNumber: orderNumber,
+            })
+            await fetchOrder()
+            setModalMessage('Товар успешно доставлен')
+            setTimeout(() => setShowModal(false), 2000)
+        } catch (error) {
+            setModalMessage('Ошибка при подтверждении товара')
+            console.log(error)
+        }
+    }
 
     if (isLoading) return <Loader />
     if (notFound)
@@ -78,7 +104,7 @@ export default function Page({ params }) {
         switch (status) {
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800'
-            case 'processing':
+            case 'shipped':
                 return 'bg-blue-100 text-blue-800'
             case 'completed':
                 return 'bg-green-100 text-green-800'
@@ -93,8 +119,8 @@ export default function Page({ params }) {
         switch (status) {
             case 'pending':
                 return 'Ожидает обработки'
-            case 'processing':
-                return 'В обработке'
+            case 'shipped':
+                return 'Доставлен'
             case 'completed':
                 return 'Выполнен'
             case 'cancelled':
@@ -107,9 +133,7 @@ export default function Page({ params }) {
     return (
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Button
-                    className="mb-6 rounded"
-                    onClick={() => router.back()}>
+                <Button className="mb-6 rounded" onClick={() => router.back()}>
                     <svg
                         fill="white"
                         className="w-5 h-5 mr-2"
@@ -128,6 +152,14 @@ export default function Page({ params }) {
                             <h1 className="text-2xl font-bold text-gray-800">
                                 Заказ #{order.order_number}
                             </h1>
+                            {order.status === 'shipped' && (
+                                <Button
+                                    onClick={handleSend}
+                                    className="rounded">
+                                    Подтвердить получение
+                                </Button>
+                            )}
+
                             <span
                                 className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
                                     order.status,
@@ -186,12 +218,7 @@ export default function Page({ params }) {
                                         className="flex items-center border rounded-lg p-4 hover:bg-gray-50">
                                         <div className="flex-shrink-0 w-20 h-20 mr-4">
                                             <ImageWithLoader
-                                                src={
-                                                    JSON.parse(
-                                                        item.product.images ||
-                                                            '[]',
-                                                    )[0]
-                                                }
+                                                src={item.product.image_preview}
                                                 alt={item.product.name}
                                                 width={80}
                                                 height={80}
@@ -212,6 +239,17 @@ export default function Page({ params }) {
                                         </div>
                                         <div className="text-right">
                                             <p className="font-medium text-gray-900">
+                                                {item.is_send ? (
+                                                    <span className="text-green-600">
+                                                        Отправлен
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-red-600">
+                                                        Не отправлен
+                                                    </span>
+                                                )}
+                                            </p>
+                                            <p className="font-medium text-gray-900">
                                                 {item.product.price *
                                                     item.quantity}{' '}
                                                 ₽
@@ -224,6 +262,17 @@ export default function Page({ params }) {
                     </div>
                 </div>
             </div>
+            <Modal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                title="Подтверждение"
+                onConfirm={
+                    modalMessage === 'Вы уверены, что получили этот товар?'
+                        ? confirmSend
+                        : undefined
+                }>
+                <p>{modalMessage}</p>
+            </Modal>
         </div>
     )
 }

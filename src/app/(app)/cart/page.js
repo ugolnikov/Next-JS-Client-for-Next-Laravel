@@ -69,9 +69,7 @@ const CartPage = () => {
         <div className="min-h-[20%] py-12 flex flex-col">
             <div className="flex-grow bg-white rounded-lg shadow-lg overflow-hidden w-full sm:px-10 mb-6 flex align-center justify-center flex-col">
                 {cart.items.map(item => {
-                    const images = JSON.parse(item.product.images || '[]')
-                    const firstImage = images[0] || '/placeholder.jpg' // Путь к изображению-заглушке
-
+                    const firstImage = item.product.image_preview 
                     return (
                         <div
                             key={item.product.id}
@@ -82,6 +80,7 @@ const CartPage = () => {
                                         src={firstImage}
                                         alt={item.product.name}
                                         fill
+                                        style={{ objectFit: 'cover' }}
                                         className="object-cover rounded-lg"
                                     />
                                 </div>

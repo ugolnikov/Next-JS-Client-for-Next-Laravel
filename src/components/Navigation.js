@@ -55,7 +55,7 @@ const Navigation = ({ user }) => {
                                     Личный кабинет
                                 </NavLink>
                             ) : null}
-                            {user?.role === 'seller' ? (
+                            {user?.role === 'seller' && user?.is_verify ? (
                                 <>
                                     <NavLink
                                         href="/dashboard/goods"
@@ -64,7 +64,7 @@ const Navigation = ({ user }) => {
                                     </NavLink>
                                     <NavLink
                                         href="/dashboard/requests"
-                                        active={pathname === '/dashboard/orders'}>
+                                        active={pathname === '/dashboard/requests'}>
                                         Заявки
                                     </NavLink>
                                 </>
@@ -185,16 +185,19 @@ const Navigation = ({ user }) => {
                                     active={pathname === '/dashboard'}>
                                     Личный кабинет
                                 </ResponsiveNavLink>
+                                {user?.role === 'seller' && user?.is_verify ? (
+                                    <>
                                 <ResponsiveNavLink
-                                    href="/dashboard"
+                                    href="/dashboard/goods"
                                     active={pathname === '/dashboard/goods'}>
                                     Редактирование товаров
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink
-                                    href="/dashboard"
+                                    href="/dashboard/orders"
                                     active={pathname === '/dashboard/orders'}>
                                     Заявки
-                                </ResponsiveNavLink>
+                                </ResponsiveNavLink></>
+                                ) : (null)} 
                             </>
                         )}
                     </div>

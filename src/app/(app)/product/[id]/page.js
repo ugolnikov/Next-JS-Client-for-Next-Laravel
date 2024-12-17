@@ -82,7 +82,6 @@ export default function Page({ params }) {
         )
     if (isError) return <p>Ошибка загрузки товара</p>
     if (!product) return <p>Товар не найден</p>
-    const images = JSON.parse(product.data.images || '[]')
 
     return (
         <div>
@@ -102,7 +101,7 @@ export default function Page({ params }) {
                 </svg>
                 Назад
             </Button>
-            <div className="container mx-auto px-4 pt-4 pb-8">
+            <div className="container mx-auto my-2 px-4 pt-4 pb-8">
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                     <div className="flex flex-col md:flex-row">
                         <div className="md:w-1/2">
@@ -113,8 +112,10 @@ export default function Page({ params }) {
                                 navigation
                                 pagination={{ clickable: true }}
                                 className="h-[500px] w-full rounded-lg">
-                                {Array.isArray(images) &&
-                                    images.map((image, index) => (
+                                {[product.data.image_preview,
+                                ...JSON.parse(product.data.images || '[]')]
+                                    .filter(Boolean)
+                                    .map((image, index) => (
                                         <SwiperSlide key={index}>
                                             <div className="flex items-center justify-center h-full bg-gray-50">
                                                 <ImageWithLoader
