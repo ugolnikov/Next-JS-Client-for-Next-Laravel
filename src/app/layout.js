@@ -9,6 +9,9 @@ const nunitoFont = Nunito({
 const RootLayout = ({ children }) => {
     return (
         <html lang="en" className={nunitoFont.className}>
+            <head>
+            <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+            </head>
             <body className="antialiased">
                 {children}
             </body>
