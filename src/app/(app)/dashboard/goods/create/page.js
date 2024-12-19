@@ -45,9 +45,9 @@ export default function CreateProduct() {
                 router.push('/dashboard/goods')
             }, 2000)
         } catch (error) {
-            throw new Error('Ошибка при создании товара:', error)
             setModalMessage('Ошибка при создании товара')
             setShowModal(true)
+            throw new Error('Ошибка при создании товара:', error)
         } finally {
             setIsLoading(false)
         }

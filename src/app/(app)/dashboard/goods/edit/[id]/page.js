@@ -67,9 +67,9 @@ export default function EditProduct({ params }) {
                 router.push('/dashboard/goods')
             }, 2000)
         } catch (error) {
-            throw new Error('Ошибка при обновлении:', error)
             setModalMessage('Ошибка при обновлении товара')
             setShowModal(true)
+            throw new Error('Ошибка при обновлении:', error)
         } finally {
             setIsSaving(false)
         }

@@ -8,13 +8,9 @@ import Image from 'next/image'
 
 
 const loadProduct = async (slug) => {
-    const url = `/api/products/${slug}`
-    try {
-        const response = await axios.get(url)
-        return response.data
-    } catch (error) {
-        throw error
-    }
+    const url = `/api/products/${slug}`;
+    const response = await axios.get(url);
+    return response.data;
 }
 
 const OneProduct = () => {

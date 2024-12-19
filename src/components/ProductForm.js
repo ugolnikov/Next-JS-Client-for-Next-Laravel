@@ -21,7 +21,7 @@ export default function ProductForm({ initialData, onSubmit, isLoading }) {
     const [previewImages, setPreviewImages] = useState([])
     const [previewMainImage, setPreviewMainImage] = useState(null)
     const [errors, setErrors] = useState({})
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [setIsSubmitting] = useState(false)
 
     useEffect(() => {
         if (initialData?.images) {
@@ -118,12 +118,12 @@ export default function ProductForm({ initialData, onSubmit, isLoading }) {
                 }))
             }
         } catch (error) {
-            throw new Error('Ошибка загрузки изображения:', error)
             setErrors((prev) => ({
                 ...prev,
                 [type === 'main' ? 'image_preview' : 'images']:
                     'Произошла ошибка при загрузке изображения',
             }))
+            throw new Error('Ошибка загрузки изображения:', error)
         } finally {
             setIsSubmitting(false)
         }
