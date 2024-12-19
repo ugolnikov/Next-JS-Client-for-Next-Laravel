@@ -43,12 +43,12 @@ export default function GoodsPage() {
         }
     }
 
-    const handlePublishToggle = async (productId, currentStatus) => {
+    const handlePublishToggle = async (productId) => {
         try {
             await axios.put(`/api/seller/products/${productId}/toggle-publish`)
             fetchProducts()
         } catch (error) {
-            console.error('Ошибка при изменении статуса публикации:', error)
+            throw new Error('Ошибка при изменении статуса публикации:', error)
         }
     }
 

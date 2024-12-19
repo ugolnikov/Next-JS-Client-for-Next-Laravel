@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from 'react'
+import styled from 'styled-components'
 
 const Loader = () => {
   return (
@@ -10,7 +10,7 @@ const Loader = () => {
         <div className="three-body__dot" />
       </div>
     </StyledWrapper>
-  );
+  )
 }
 
 const StyledWrapper = styled.div`
@@ -115,6 +115,6 @@ const StyledWrapper = styled.div`
     transform: translateY(66%) scale(0.65);
     opacity: 0.8;
    }
-  }`;
+  }`
 
-export default Loader;
+export default Loader

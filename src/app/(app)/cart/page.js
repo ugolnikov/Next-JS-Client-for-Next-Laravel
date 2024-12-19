@@ -39,7 +39,7 @@ const CartPage = () => {
             await axios.delete(`/api/cart/${cartId}`)
             mutateCart()
         } catch (error) {
-            console.error('Ошибка при удалении товара из корзины', error)
+            throw new Error('Ошибка при удалении товара из корзины', error)
         } finally {
             setLoading(false)
         }

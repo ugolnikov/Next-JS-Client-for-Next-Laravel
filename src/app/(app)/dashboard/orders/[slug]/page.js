@@ -27,10 +27,9 @@ export default function Page({ params }) {
     const [isLoading, setIsLoading] = useState(true)
     const [isError, setIsError] = useState(false)
     const [notFound, setNotFound] = useState(false)
-    const [error, setError] = useState(null)
     const [showModal, setShowModal] = useState(false)
     const [modalMessage, setModalMessage] = useState('')
-    const [selectedOrderId, setSelectedOrderId] = useState(null)
+    const [ setSelectedOrderId] = useState(null)
 
     const fetchOrder = async () => {
         if (!orderNumber) return
@@ -83,7 +82,7 @@ export default function Page({ params }) {
             setTimeout(() => setShowModal(false), 2000)
         } catch (error) {
             setModalMessage('Ошибка при подтверждении товара')
-            console.log(error)
+            throw new Error(error)
         }
     }
 

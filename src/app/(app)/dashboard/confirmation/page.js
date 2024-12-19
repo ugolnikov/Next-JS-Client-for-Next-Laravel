@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/auth'
 import { useRouter } from 'next/navigation'
 import axios from '@/lib/axios'
 import Button from '@/components/Button'
+import Image from 'next/image'
 
 const ProfileConfirmation = () => {
     const router = useRouter()
@@ -143,7 +144,6 @@ const ProfileConfirmation = () => {
                 return
             }
 
-            // Преобразуем данные в формат, ожидаемый API
             const formData = {
                 companyName: profile.company_name,
                 inn: profile.inn,
@@ -152,7 +152,7 @@ const ProfileConfirmation = () => {
                 logo: profile.logo,
             }
 
-            const response = await axios.post('/api/validate/seller', formData)
+            await axios.post('/api/validate/seller', formData)
             
             await mutate()
             setSuccess('Профиль успешно подтвержден')
@@ -296,7 +296,7 @@ const ProfileConfirmation = () => {
                     )}
                     {profile.logo && (
                         <div className="mt-4">
-                            <img
+                            <Image
                                 src={profile.logo}
                                 alt="Логотип компании"
                                 className="w-32 h-32 object-cover rounded-lg"

@@ -5,9 +5,9 @@ import axios from 'axios'
 
 export default function ProductForm({ initialData, onSubmit, isLoading }) {
     const getCsrfToken = async () => {
-        await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sanctum/csrf-cookie`);
-    };
-    axios.defaults.withCredentials = true;
+        await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/sanctum/csrf-cookie`)
+    }
+    axios.defaults.withCredentials = true
     const [formData, setFormData] = useState({
         name: '',
         price: '',
@@ -29,7 +29,7 @@ export default function ProductForm({ initialData, onSubmit, isLoading }) {
                 const parsedImages = JSON.parse(initialData.images)
                 setPreviewImages(parsedImages)
             } catch (e) {
-                console.error('Ошибка парсинга изображений:', e)
+                throw new Error('Ошибка парсинга изображений:', e)
             }
         }
         if (initialData?.image_preview) {
@@ -89,7 +89,7 @@ export default function ProductForm({ initialData, onSubmit, isLoading }) {
 
     const uploadImage = async (file, type) => {
         try {
-            await getCsrfToken();
+            await getCsrfToken()
             setIsSubmitting(true)
             const formData = new FormData()
             formData.append('image', file)
@@ -106,7 +106,6 @@ export default function ProductForm({ initialData, onSubmit, isLoading }) {
 
             if (type === 'main') {
                 setPreviewMainImage(process.env.NEXT_PUBLIC_API_URL + response.data.imageUrl)
-                console.log(response.data.imageUrl)
                 setFormData((prev) => ({
                     ...prev,
                     image_preview: process.env.NEXT_PUBLIC_API_URL + response.data.imageUrl,
@@ -119,7 +118,7 @@ export default function ProductForm({ initialData, onSubmit, isLoading }) {
                 }))
             }
         } catch (error) {
-            console.error('Ошибка загрузки изображения:', error)
+            throw new Error('Ошибка загрузки изображения:', error)
             setErrors((prev) => ({
                 ...prev,
                 [type === 'main' ? 'image_preview' : 'images']:

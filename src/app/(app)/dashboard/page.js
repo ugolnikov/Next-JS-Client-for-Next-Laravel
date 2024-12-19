@@ -6,6 +6,7 @@ import axios from '@/lib/axios'
 import { useRouter } from 'next/navigation'
 import Loader from '@/components/Loader'
 import { useState } from 'react'
+import Image from 'next/image'
 
 const Dashboard = () => {
     const { user, mutate, orders, isLoading, updatePhone } = useAuth()
@@ -77,7 +78,7 @@ const Dashboard = () => {
             await axios.post(url)
             mutate()
         } catch (error) {
-            console.error('Ошибка при смене роли:', error)
+            throw new Error('Ошибка при смене роли:', error)
         }
     }
 
@@ -191,7 +192,7 @@ const Dashboard = () => {
                                         <div className="relative h-48 bg-gradient-to-r from-[#4438ca] to-[#6d64ff]">
                                             <div className="absolute -bottom-12 left-8">
                                                 {user?.logo ? (
-                                                    <img
+                                                    <Image
                                                         src={user.logo}
                                                         alt="Логотип компании"
                                                         className="w-24 h-24 rounded-lg border-4 border-white shadow-lg object-cover bg-white"

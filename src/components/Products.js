@@ -5,10 +5,8 @@ import Loader from '@/components/Loader'
 import { useState, useEffect } from 'react'
 import Search from '@/components/Search'
 import ImageWithLoader from './ImageWithLoader'
-import AddToCart from '@/components/AddToCartButton'
 import { useRouter } from 'next/navigation'
 import Button from '@/components/Button'
-import AddToCartBtn from '@/components/AddToCartButton'
 
 const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
     const url = `/api/products?${sellerId ? `seller_id=${sellerId}&` : ''}${
@@ -39,11 +37,11 @@ const loadProducts = ({ sellerId, searchQuery, page = 1 } = {}) => {
 }
 
 const ProductList = () => {
-    const router = useRouter();
+    const router = useRouter()
     const [page, setPage] = useState(1)
     const [searchQuery, setSearchQuery] = useState('')
     const [submitQuery, setSubmitQuery] = useState('')
-    const { products, isLoading, isError, refreshProducts } = loadProducts({
+    const { products, isLoading, isError } = loadProducts({
         searchQuery: submitQuery,
         page,
     })

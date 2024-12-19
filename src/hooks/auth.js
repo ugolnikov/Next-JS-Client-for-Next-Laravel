@@ -1,8 +1,7 @@
-import useSWR, { useSWRConfig } from 'swr'
+import useSWR from 'swr'
 import axios from '@/lib/axios'
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { reject } from 'lodash'
 
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
@@ -116,7 +115,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         if (!error) {
             await axios.post('/logout').then(() => mutate())
         } else {
-            console.log('Ошибка:', error)
+            throw new Error('Ошибка:', error)
         }
 
         window.location.pathname = '/login'
@@ -177,7 +176,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             })
             mutateCart()
         } catch (error) {
-            console.error('Ошибка при добавлении в корзину:', error)
+            throw new Error('Ошибка при добавлении в корзину:', error)
         }
     }
 
@@ -202,9 +201,11 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         updatePhone,
         mutate,
         cart,
+        cartError,
         addToCart,
         mutateCart,
         orders,
+        ordersError,
         mutateOrder,
         logout,
         isLoading
