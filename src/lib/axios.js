@@ -1,13 +1,17 @@
 import Axios from 'axios'
 
-const axios = Axios.create({
+const axios = Axios.create(
+    {
     adapter: require('axios/lib/adapters/http'),
-    baseURL: 'http://ugolnikov2.temp.swtest.ru/',
+    httpAgent: new http.Agent({ keepAlive: true }),
+    
     headers: {
         'X-Requested-With': 'XMLHttpRequest',
     },
     withCredentials: true,
-    withXSRFToken: true
-})
+    withXSRFToken: true,
+    baseURL: 'http://ugolnikov2.temp.swtest.ru/',
+    }
+)
 
 export default axios
