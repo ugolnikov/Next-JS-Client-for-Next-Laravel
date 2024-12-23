@@ -195,6 +195,8 @@ const Dashboard = () => {
                                                     <Image
                                                         src={user.logo}
                                                         alt="Логотип компании"
+                                                        width="200"
+                                                        height="200"
                                                         className="w-24 h-24 rounded-lg border-4 border-white shadow-lg object-cover bg-white"
                                                     />
                                                 ) : (
