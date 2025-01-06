@@ -8,7 +8,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
     const csrf = () => {
-        res = axios.get('/sanctum/csrf-cookie')
+        let res = axios.get('/sanctum/csrf-cookie')
         const csrfToken = Cookies.get('XSRF-TOKEN')
         console.log('Response: ', res)
         if (csrfToken) {
