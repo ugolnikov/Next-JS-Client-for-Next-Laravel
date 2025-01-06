@@ -9,10 +9,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const params = useParams()
     const csrf = () => {
         axios.get('/sanctum/csrf-cookie')
-        const csrfToken = Cookies.get()
-            .split('; ')
-            .find(row => row.startsWith('XSRF-TOKEN'))
-            ?.split('=')[1]
+        const csrfToken = Cookies.get('XSRF-TOKEN')
 
         if (csrfToken) {
             axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
