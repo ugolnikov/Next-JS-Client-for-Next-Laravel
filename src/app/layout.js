@@ -1,5 +1,5 @@
 import { Nunito } from 'next/font/google'
-import { CookiesProvider } from 'next-client-cookies/server';
+import { CookiesProvider } from 'next-client-cookies/server'
 import '@/app/global.css'
 
 const nunitoFont = Nunito({

@@ -2,11 +2,11 @@ import useSWR from 'swr'
 import axios from '@/lib/axios'
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { useCookies } from 'next-client-cookies';
+import { useCookies } from 'next-client-cookies'
 
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
-    const cookies = useCookies();
+    const cookies = useCookies()
     const params = useParams()
     const csrf = async () => {
         const res = await axios.get('/sanctum/csrf-cookie')
