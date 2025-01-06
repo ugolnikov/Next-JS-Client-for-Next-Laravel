@@ -1,42 +1,27 @@
 import useSWR from 'swr'
 import axios from '@/lib/axios'
+import Cookies from 'js-cookie' 
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
-    axios.interceptors.request.use(config => {
-        // Извлечение токена из cookie
-        const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
-            const [key, value] = cookie.split('=')
-            acc[key] = value
-            return acc
-        }, {})
-    
-        const csrfToken = cookies['XSRF-TOKEN']
-    
-        if (csrfToken) {
-            config.headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
-        }
-    
-        return config
-    })
-    // const csrf = () => {
-    //     axios.get('/sanctum/csrf-cookie')
-    //     const csrfToken = document.cookie
-    //         .split('; ')
-    //         .find(row => row.startsWith('XSRF-TOKEN'))
-    //         ?.split('=')[1]
+    const csrf = () => {
+        axios.get('/sanctum/csrf-cookie')
+        const csrfToken = Cookies.get()
+            .split('; ')
+            .find(row => row.startsWith('XSRF-TOKEN'))
+            ?.split('=')[1]
 
-    //     if (csrfToken) {
-    //         axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
-    //         console.log(csrfToken)
-    //     } else {
-    //         console.log('CSRF TOKEN IS MISSING')
-    //         console.log('Cookie', document.cookie)
-    //     }
-    // }
+        if (csrfToken) {
+            axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+            console.log(csrfToken)
+        } else {
+            console.log('CSRF TOKEN IS MISSING')
+            console.log('Cookie', Cookies.get())
+        }
+    }
 
     const {
         data: user,
@@ -62,7 +47,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     )
 
     const register = async ({ setErrors, ...props }) => {
-        // await csrf()
+        await csrf()
 
         setErrors([])
 
@@ -77,7 +62,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const login = async ({ setErrors, setStatus, ...props }) => {
-        // await csrf()
+        await csrf()
 
         setErrors([])
 
@@ -94,7 +79,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const forgotPassword = async ({ setErrors, setStatus, email }) => {
-        // await csrf()
+        await csrf()
 
         setErrors([])
         setStatus(null)
@@ -110,7 +95,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const resetPassword = async ({ setErrors, setStatus, ...props }) => {
-        // await csrf()
+        await csrf()
 
         setErrors([])
         setStatus(null)
@@ -128,7 +113,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const updatePhone = async (phone) => {
-        // await csrf()
+        await csrf()
 
         try {
             await axios.post('/api/update-phone', { phone })
@@ -143,7 +128,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const logout = async () => {
-        // await csrf()
+        await csrf()
         if (!error) {
             await axios.post('/logout').then(() => mutate())
         } else {
@@ -199,7 +184,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             return
         }
 
-        // await csrf()
+        await csrf()
 
         try {
             await axios.post('/api/cart', {
