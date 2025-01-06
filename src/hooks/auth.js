@@ -6,25 +6,37 @@ import { useParams, useRouter } from 'next/navigation'
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
-
-    const csrf = async () => {
-        try {
-            const res = await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+    axios.interceptors.request.use(config => {
+        // Извлечение токена из cookie
+        const cookies = document.cookie.split('; ').reduce((acc, cookie) => {
+            const [key, value] = cookie.split('=')
+            acc[key] = value
+            return acc
+        }, {})
     
-            // Попытка получить токен из заголовков ответа
-            const csrfToken = res.headers['x-xsrf-token'] || null
+        const csrfToken = cookies['XSRF-TOKEN']
     
-            if (csrfToken) {
-                // Установка токена в заголовок для последующих запросов
-                axios.defaults.headers.common['X-XSRF-TOKEN'] = csrfToken
-                console.log('CSRF Token set from response header:', csrfToken)
-            } else {
-                console.log('CSRF Token not found in response headers.')
-            }
-        } catch (error) {
-            console.error('Failed to fetch CSRF cookie:', error)
+        if (csrfToken) {
+            config.headers['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
         }
-    }
+    
+        return config
+    })
+    // const csrf = () => {
+    //     axios.get('/sanctum/csrf-cookie')
+    //     const csrfToken = document.cookie
+    //         .split('; ')
+    //         .find(row => row.startsWith('XSRF-TOKEN'))
+    //         ?.split('=')[1]
+
+    //     if (csrfToken) {
+    //         axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+    //         console.log(csrfToken)
+    //     } else {
+    //         console.log('CSRF TOKEN IS MISSING')
+    //         console.log('Cookie', document.cookie)
+    //     }
+    // }
 
     const {
         data: user,
@@ -65,7 +77,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const login = async ({ setErrors, setStatus, ...props }) => {
-        await csrf()
+        // await csrf()
 
         setErrors([])
 
