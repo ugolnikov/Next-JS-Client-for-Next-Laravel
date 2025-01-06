@@ -7,8 +7,8 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
 
-    const csrf = async () => {
-        await axios.get('/sanctum/csrf-cookie')
+    const csrf = () => {
+        axios.get('/sanctum/csrf-cookie')
         const csrfToken = document.cookie
             .split('; ')
             .find(row => row.startsWith('XSRF-TOKEN'))
@@ -19,6 +19,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             console.log(csrfToken)
         } else {
             console.log('CSRF TOKEN IS MISSING')
+            console.log('Cookie', document.cookie)
         }
     }
 
