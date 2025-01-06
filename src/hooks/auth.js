@@ -7,19 +7,22 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
 
-    const csrf = () => {
-        axios.get('/sanctum/csrf-cookie')
-        const csrfToken = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('XSRF-TOKEN'))
-            ?.split('=')[1]
-
-        if (csrfToken) {
-            axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
-            console.log(csrfToken)
-        } else {
-            console.log('CSRF TOKEN IS MISSING')
-            console.log('Cookie', document.cookie)
+    const csrf = async () => {
+        try {
+            const res = await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+    
+            // Попытка получить токен из заголовков ответа
+            const csrfToken = res.headers['x-xsrf-token'] || null
+    
+            if (csrfToken) {
+                // Установка токена в заголовок для последующих запросов
+                axios.defaults.headers.common['X-XSRF-TOKEN'] = csrfToken
+                console.log('CSRF Token set from response header:', csrfToken)
+            } else {
+                console.log('CSRF Token not found in response headers.')
+            }
+        } catch (error) {
+            console.error('Failed to fetch CSRF cookie:', error)
         }
     }
 

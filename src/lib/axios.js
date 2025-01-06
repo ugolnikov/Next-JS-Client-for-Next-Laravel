@@ -9,15 +9,5 @@ const axios = Axios.create({
     withCredentials: true, 
 })
 
-// Интерсептор для установки X-XSRF-TOKEN заголовка
-axios.interceptors.request.use(config => {
-    const token = Cookies.get('XSRF-TOKEN')
-    if (token) {
-        config.headers['X-XSRF-TOKEN'] = token
-    }
-    return config
-}, error => {
-    return Promise.reject(error)
-})
 
 export default axios
