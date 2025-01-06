@@ -6,7 +6,18 @@ import { useParams, useRouter } from 'next/navigation'
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
-    const csrf = () => axios.get('/sanctum/csrf-cookie')
+
+    const csrf = async () => {
+        await axios.get('/sanctum/csrf-cookie')
+        const csrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('XSRF-TOKEN'))
+            ?.split('=')[1]
+
+        if (csrfToken) {
+            axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+        }
+    }
 
     const {
         data: user,
@@ -30,6 +41,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             shouldRetryOnError: false,
         },
     )
+
     const register = async ({ setErrors, ...props }) => {
         await csrf()
 
@@ -49,6 +61,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         await csrf()
 
         setErrors([])
+
         setStatus(null)
 
         axios
@@ -94,12 +107,13 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
                 setErrors(error.response.data.errors)
             })
     }
+
     const updatePhone = async (phone) => {
         await csrf()
-    
+
         try {
             await axios.post('/api/update-phone', { phone })
-            await mutate() 
+            await mutate()
             return { success: true }
         } catch (error) {
             if (error.response?.status === 422) {
