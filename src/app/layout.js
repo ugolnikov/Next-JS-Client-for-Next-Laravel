@@ -1,4 +1,5 @@
 import { Nunito } from 'next/font/google'
+import { CookiesProvider } from 'next-client-cookies/server';
 import '@/app/global.css'
 
 const nunitoFont = Nunito({
@@ -8,6 +9,7 @@ const nunitoFont = Nunito({
 
 const RootLayout = ({ children }) => {
     return (
+        <CookiesProvider>
         <html lang="en" className={nunitoFont.className}>
             <head>
             <meta httpEquiv="Content-Security-Policy" content="upgrade-insecure-requests" />
@@ -16,6 +18,7 @@ const RootLayout = ({ children }) => {
                 {children}
             </body>
         </html>
+        </CookiesProvider>
     )
 }
 
