@@ -17,7 +17,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             console.log(csrfToken)
         } else {
             console.log('CSRF TOKEN IS MISSING')
-            console.log('Cookies by js-cookie: ', cookies.get('XSRF-TOKEN'))
+            console.log('Cookies by js-cookie: ', cookies.get())
             console.log('Cookies: ', document.cookie)
         }
     }
