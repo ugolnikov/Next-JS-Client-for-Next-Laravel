@@ -62,7 +62,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     )
 
     const register = async ({ setErrors, ...props }) => {
-        await csrf()
+        // await csrf()
 
         setErrors([])
 
@@ -94,7 +94,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const forgotPassword = async ({ setErrors, setStatus, email }) => {
-        await csrf()
+        // await csrf()
 
         setErrors([])
         setStatus(null)
@@ -110,7 +110,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const resetPassword = async ({ setErrors, setStatus, ...props }) => {
-        await csrf()
+        // await csrf()
 
         setErrors([])
         setStatus(null)
@@ -128,7 +128,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const updatePhone = async (phone) => {
-        await csrf()
+        // await csrf()
 
         try {
             await axios.post('/api/update-phone', { phone })
@@ -143,7 +143,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     }
 
     const logout = async () => {
-        await csrf()
+        // await csrf()
         if (!error) {
             await axios.post('/logout').then(() => mutate())
         } else {
@@ -199,7 +199,7 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
             return
         }
 
-        await csrf()
+        // await csrf()
 
         try {
             await axios.post('/api/cart', {
