@@ -8,25 +8,22 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
     const csrf = async () => {
-        const res = await axios.get('/sanctum/csrf-cookie')
-        console.log('Response: ', res)
-        console.log('Response headers: ', res.headers)
-        console.log('Response cookie header: ', res.headers['set-cookie'])
-        const cookie = (res.headers['set-cookie'])
-            .find(cookie => cookie.includes('XSRF-TOKEN'))
-            ?.match(new RegExp(`^${'XSRF-TOKEN'}=(.+?);`))
-            ?.[1]
-        const csrfToken = Cookies.get('XSRF-TOKEN')
-        
-        if (csrfToken) {
-            axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
-            console.log(csrfToken)
-        } else {
-            console.log('CSRF TOKEN IS MISSING')
-            console.log('Cookies by js-cookie: ', Cookies.get())
-            console.log('Cookies: ', Cookies.get())
-            console.log('New Cookies: ', cookie) 
-                
+        try {
+            res = await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+            console.log('Response: ', res)
+            console.log('Response headers: ',res.headers)
+            const csrfToken = Cookies.get('XSRF-TOKEN')
+            console.log('All cookies: ',Cookies.get())
+            console.log('Cookies token: ',Cookies.get('XSRF-TOKEN'))
+    
+            if (csrfToken) {
+                axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+                console.log('CSRF Token set:', csrfToken)
+            } else {
+                console.error('CSRF Token is missing from cookies')
+            }
+        } catch (error) {
+            console.error('Failed to fetch CSRF cookie:', error)
         }
     }
 
