@@ -1,22 +1,23 @@
 import useSWR from 'swr'
 import axios from '@/lib/axios'
-import Cookies from 'js-cookie' 
 import { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { cookies } from 'next/headers'
 
 export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
-    const csrf = () => {
-        let res = axios.get('/sanctum/csrf-cookie')
-        const csrfToken = Cookies.get('XSRF-TOKEN')
+    const csrf = async () => {
+        const cookieStore = await cookies()
+        const res = await axios.get('/sanctum/csrf-cookie')
+        const csrfToken = cookieStore.get('XSRF-TOKEN')
         console.log('Response: ', res)
         if (csrfToken) {
             axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
             console.log(csrfToken)
         } else {
             console.log('CSRF TOKEN IS MISSING')
-            console.log('Cookies by js-cookie: ', Cookies.get('XSRF-TOKEN'))
+            console.log('Cookies by js-cookie: ', cookieStore.get('XSRF-TOKEN'))
             console.log('Cookies: ', document.cookie)
         }
     }
