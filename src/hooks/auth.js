@@ -16,6 +16,9 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
 
         if (csrfToken) {
             axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+            console.log(csrfToken)
+        } else {
+            console.log('CSRF TOKEN IS MISSING')
         }
     }
 
