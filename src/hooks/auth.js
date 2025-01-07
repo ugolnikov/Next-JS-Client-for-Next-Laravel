@@ -9,15 +9,15 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const params = useParams()
     const csrf = async () => {
         try {
-            const res = await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+            await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
             const csrfToken = Cookies.get('XSRF-TOKEN')
             if (csrfToken) {
                 axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
             } else {
-                console.error('CSRF Token is missing from cookies')
+                throw new Error('CSRF Token is missing from cookies')
             }
         } catch (error) {
-            console.error('Failed to fetch CSRF cookie:', error)
+            throw error
         }
     }
 
