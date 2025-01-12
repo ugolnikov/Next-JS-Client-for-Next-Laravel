@@ -193,8 +193,8 @@ const Navigation = ({ user }) => {
                                     Редактирование товаров
                                 </ResponsiveNavLink>
                                 <ResponsiveNavLink
-                                    href="/dashboard/orders"
-                                    active={pathname === '/dashboard/orders'}>
+                                    href='/dashboard/requests'
+                                    active={pathname === '/dashboard/requests'}>
                                     Заявки
                                 </ResponsiveNavLink></>
                                 ) : (null)} 
