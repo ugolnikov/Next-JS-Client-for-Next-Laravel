@@ -8,12 +8,17 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
     const router = useRouter()
     const params = useParams()
     const csrf = async () => {
-        await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
-        const csrfToken = Cookies.get('XSRF-TOKEN')
-        if (csrfToken) {
-            axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
-        } else {
-            throw new Error('CSRF Token is missing from cookies')
+        try {
+            await axios.get('/sanctum/csrf-cookie', { withCredentials: true })
+            const csrfToken = Cookies.get('XSRF-TOKEN')
+            if (csrfToken) {
+                axios.defaults.headers.common['X-XSRF-TOKEN'] = decodeURIComponent(csrfToken)
+            } else {
+                throw new Error('CSRF Token is missing from cookies')
+            }
+        } catch (error) {
+            console.error('CSRF Error:', error)
+            throw error
         }
     }
 
